@@ -36,7 +36,11 @@ FILESRC=QQ.NAS.BX.DDD.UPDTNDG.XIBM.NET
 FILEDST=/opt/FileNet/shared/FileStores
 
 #Test connection with remote server
-lftp 'open -u ${USER},${PASS} ftps://$FTPS_HOST; ls'
+lftp 'open -e "set ftps:initial-prot ""; \
+	set ftp:ssl-force true; \
+	set ftp:ssl-protect-data true; "\
+	-u "${USER}","${PASS}" \
+	ftps://${FTPS_HOST}; ls'
 RC=$?
 if [ $RC -ne 0 ]; then
 	echo "Error: connection to ftps server failed"
@@ -48,7 +52,7 @@ lftp -c 'open -e "set ftps:initial-prot ""; \
    set ftp:ssl-force true; \
    set ftp:ssl-protect-data true; "\
    -u "${USER}","${PASS}" \
-   ftps://FTPS7E.intranet.unicredit.it:921
+   ftps://${FTSP_HOST};
 
 get ${FILESRC} -o ${FILEDST}'
 
