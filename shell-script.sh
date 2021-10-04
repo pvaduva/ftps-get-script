@@ -26,30 +26,35 @@ if [ $PasswordRetrived -eq 0 ] ; then
 	exit $RC
 else
 	
-	export SSHPASS=$(echo $OUT | awk -F"," '{print $1}')
+	PASS=$(echo $OUT | awk -F"," '{print $1}')
 fi
 
 #parameters to be edited for local environment
 USER=TA06546
-SFTP_HOST=IT7E.intranet.unicredit.it
-FILESRC=/userfile
-FILEDST=userfolder/userfile
+FTPS_HOST=IT7E.intranet.unicredit.it
+FILESRC=QQ.NAS.BX.DDD.UPDTNDG.XIBM.NET
+FILEDST=/opt/FileNet/shared/FileStores
 
-#if file exists the file_exists variable will be 1 in other case it will be 0
-file_exists=$(ls ${FILEDST} 2>/dev/null | wc -l)
-
-#throw error and exit if the file already exists
-if [ $file_exists -eq 1 ]; then 
-	echo "Error: File already exists!"
-	exit 125
+#Test connection with remote server
+lftp 'open -u ${USER},${PASS} ftps://$FTPS_HOST; ls'
+RC=$?
+if [ $RC -ne 0 ]; then
+	echo "Error: connection to ftps server failed"
+	exit $RC
 fi
 
 #copy the desired file using sftp protocol, user and password
-sshpass -e sftp ${USER}@${SFTP_HOST}:${FILESRC} ${FILEDST}
+lftp -c 'open -e "set ftps:initial-prot ""; \
+   set ftp:ssl-force true; \
+   set ftp:ssl-protect-data true; "\
+   -u "${USER}","${PASS}" \
+   ftps://FTPS7E.intranet.unicredit.it:921
 
-#Test for file transfer success and throw error otherwisse
-RC = $?
+get ${FILESRC} -o ${FILEDST}'
+
+#Test for ftps connection success and throw error otherwisse
+RC=$?
 if [ $RC -ne 0]; then
-	echo "Error: sftp file transfer failed"
+	echo "Error: file already present on NAS storage"
 	exit $RC
 fi
