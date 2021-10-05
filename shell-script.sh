@@ -30,17 +30,24 @@ else
 fi
 
 #parameters to be edited for local environment
+# the technical user
 USER=TA06546
+
+# the ftps servers addres
 FTPS_HOST=IT7E.intranet.unicredit.it
+
+# the name of the required file
 FILESRC=QQ.NAS.BX.DDD.UPDTNDG.XIBM.NET
+
+# hte NAS mount point
 FILEDST=/opt/FileNet/shared/FileStores
 
 #Test connection with remote server
-lftp 'open -e "set ftps:initial-prot ""; \
+lftp -c "open -e \"set ftps:initial-prot; \
 	set ftp:ssl-force true; \
-	set ftp:ssl-protect-data true; "\
-	-u "${USER}","${PASS}" \
-	ftps://${FTPS_HOST}; ls'
+	set ftp:ssl-protect-data true; \"\
+	-u "${TUSER}","${TPASS}" \
+	ftp://${FTPS_HOST}:921; ls"
 RC=$?
 if [ $RC -ne 0 ]; then
 	echo "Error: connection to ftps server failed"
@@ -48,17 +55,17 @@ if [ $RC -ne 0 ]; then
 fi
 
 #copy the desired file using sftp protocol, user and password
-lftp -c 'open -e "set ftps:initial-prot ""; \
-   set ftp:ssl-force true; \
-   set ftp:ssl-protect-data true; "\
-   -u "${USER}","${PASS}" \
-   ftps://${FTSP_HOST};
+lftp -c "open -e \"set ftps:initial-prot; \
+        set ftp:ssl-force true; \
+        set ftp:ssl-protect-data true; \"\
+        -u "${TUSER}","${TPASS}" \
+        ftp://${FTPS_HOST}:921;
 
-get ${FILESRC} -o ${FILEDST}'
+get ${FILESRC} -o ${FILEDST}; exit"
 
 #Test for ftps connection success and throw error otherwisse
 RC=$?
-if [ $RC -ne 0]; then
+if [ $RC -ne 0 ]; then
 	echo "Error: file already present on NAS storage"
 	exit $RC
 fi
