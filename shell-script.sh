@@ -35,6 +35,7 @@ USER=TA06546
 
 # the ftps servers addres
 FTPS_HOST=IT7E.intranet.unicredit.it
+FTPS_PORT=921
 
 # the name of the required file
 FILESRC=QQ.NAS.BX.DDD.UPDTNDG.XIBM.NET
@@ -47,7 +48,7 @@ lftp -c "open -e \"set ftps:initial-prot; \
 	set ftp:ssl-force true; \
 	set ftp:ssl-protect-data true; \"\
 	-u "${TUSER}","${TPASS}" \
-	ftp://${FTPS_HOST}:921; ls"
+	ftp://${FTPS_HOST}:${FTPS_PORT}; ls"
 RC=$?
 if [ $RC -ne 0 ]; then
 	echo "Error: connection to ftps server failed"
@@ -59,7 +60,7 @@ lftp -c "open -e \"set ftps:initial-prot; \
         set ftp:ssl-force true; \
         set ftp:ssl-protect-data true; \"\
         -u "${TUSER}","${TPASS}" \
-        ftp://${FTPS_HOST}:921;
+        ftp://${FTPS_HOST}:${FTPS_PORT};
 
 get ${FILESRC} -o ${FILEDST}; exit"
 

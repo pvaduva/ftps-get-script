@@ -18,6 +18,7 @@ TPASS=FSBhuNOR
 
 # the ftps servers addres
 FTPS_HOST=localhost
+FTPS_PORT=21000
 
 # the name of the required file
 FILESRC=testfile
@@ -31,12 +32,21 @@ lftp -c "open -e \"set ftps:initial-prot; \
 	set ssl:verify-certificate false; \
 	set ftp:ssl-protect-data true; \"\
 	-u "${TUSER}","${TPASS}" \
-	ftp://${FTPS_HOST}:21000; ls ${FILESRC}* | awk \'{ print $1 }\'"
+	ftp://${FTPS_HOST}:${FTPS_PORT}; ls ${FILESRC}*" > "/tmp/temp.file"
 RC=$?
 if [ $RC -ne 0 ]; then
 	echo "Error: connection to ftps server failed"
 	exit $RC
 fi
+
+lista=$(awk '{ print $9 }' /tmp/temp.file)
+arr=($lista)
+
+# the name of the required file
+FILESRC=${arr[$1]}
+
+# remove the temp file
+rm /tmp/temp.file
 
 #copy the desired file using sftp protocol, user and password
 lftp -c "open -e \"set ftps:initial-prot; \
@@ -44,7 +54,7 @@ lftp -c "open -e \"set ftps:initial-prot; \
 	set ssl:verify-certificate false; \
         set ftp:ssl-protect-data true; \"\
         -u "${TUSER}","${TPASS}" \
-        ftp://${FTPS_HOST}:21000;
+        ftp://${FTPS_HOST}:${FTPS_PORT};
 
 get ${FILESRC} -o ${FILEDST}; exit"
 
