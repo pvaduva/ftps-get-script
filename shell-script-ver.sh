@@ -1,5 +1,11 @@
 #!/bin/bash
 
+if [ $1 -gt 0 ]; then
+	echo "This parameter is 0 - (Current record)"
+	echo "Or negaive number - (Historical record)"
+	exit 124
+fi
+
 #Password retrieving procedure
 PasswordRetrived=0
 while [ $PasswordRetrived -eq 0 ] ; do
@@ -59,11 +65,16 @@ fi
 lista=$(awk '{ print $9 }' /tmp/temp.file)
 arr=($lista)
 
-# the name of the required file
-FILESRC=${arr[$1]}
-
 # remove the temp file 
 rm /tmp/temp.file
+
+if [ ${#arr[@]} -le ${1#-} ]; then
+       echo "The history of the record is not kept that long"
+       exit 125
+fi
+
+# the name of the required file
+FILESRC=${arr[$1]}
 
 #copy the desired file using sftp protocol, user and password
 lftp -c "open -e \"set ftps:initial-prot; \
