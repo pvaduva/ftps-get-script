@@ -26,7 +26,7 @@ if [ $PasswordRetrived -eq 0 ] ; then
 	exit $RC
 else
 	
-	PASS=$(echo $OUT | awk -F"," '{print $1}')
+	TPASS=$(echo $OUT | awk -F"," '{print $1}')
 fi
 
 #parameters to be edited for local environment

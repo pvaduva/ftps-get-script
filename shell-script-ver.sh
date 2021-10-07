@@ -32,7 +32,7 @@ if [ $PasswordRetrived -eq 0 ] ; then
 	exit $RC
 else
 	
-	PASS=$(echo $OUT | awk -F"," '{print $1}')
+	TPASS=$(echo $OUT | awk -F"," '{print $1}')
 fi
 
 #parameters to be edited for local environment
@@ -65,7 +65,7 @@ fi
 lista=$(awk '{ print $9 }' /tmp/temp.file)
 arr=($lista)
 
-# remove the temp file 
+# remove the temp file
 rm /tmp/temp.file
 
 if [ ${#arr[@]} -le ${1#-} ]; then
