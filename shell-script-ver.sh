@@ -1,4 +1,11 @@
 #!/bin/bash
+#script intended for downloading user file
+#through ftps inteded for both QQ and PROD
+#environments the distinction being done 
+#with the help of the technical user either
+#linux user which should be known by the 
+#script
+
 
 #Test for the existance of arguments
 if [ $# -eq 0 ]; then
