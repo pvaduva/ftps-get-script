@@ -2,8 +2,8 @@
 
 #Test for the existance of arguments
 if [ $# -eq 0 ]; then
-    echo "No arguments supplied"
-    exit 123
+	echo "No arguments supplied"
+	exit 123
 fi
 
 if [ $1 -gt 0 ]; then
@@ -12,34 +12,42 @@ if [ $1 -gt 0 ]; then
 	exit 124
 fi
 
+# Assumes the technical user is the one that is 
+# used to execute the script as local linux user
+# if that is not the case and the technical user
+# is passed as environment variable USER than 
+# this line can be deleted
 USER=$(whoami)
 
-
+# if the technical user is passed as different
+# environment variable that replace $USER with 
+# $WHATEVER variable is used for the technical 
+# user
 if [ $USER = TA06547 ]; then
-	# the technical user
+	# the technical user QQ env
 	TUSER=TA06547
 
-	# the ftps servers addres
+	# the ftps servers addres QQ
 	FTPS_HOST=IT7E.intranet.unicredit.it
 	FTPS_PORT=921
 
-	# the name of the required file
+	# the name of the required file QQ
 	FILESRC=QQ.NAS.BX.DDD.UPDTNDG.XIBM.NET
 
-	# hte NAS mount point
+	# hte NAS mount point QQ
 	FILEDST=/opt/FileNet/shared/host
 elif [ $USER = TA06548 ]; then
-	# the technical user
+	# the technical user for PROD env
 	TUSER=TA06548
 
-	# the ftps servers addres
-	FTPS_HOST=IT8E.intranet.unicredit.it
+	# the ftps servers addres for PROD
+	FTPS_HOST=IT7A.intranet.unicredit.it
 	FTPS_PORT=921
 
-	# the name of the required file
+	# the name of the required file PROD env
 	FILESRC=QE.NAS.BX.DDD.UPDTNDG.XIBM.NET
 
-	# hte NAS mount point
+	# hte NAS mount point for PROD env
 	FILEDST=/opt/FileNet/shared/host
 fi
 
@@ -68,7 +76,6 @@ if [ $PasswordRetrived -eq 0 ] ; then
 	echo "Error: Password could not be retrieved"
 	exit $RC
 else
-	
 	TPASS=$(echo $OUT | awk -F"," '{print $1}')
 fi
 
