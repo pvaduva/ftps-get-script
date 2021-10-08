@@ -10,11 +10,18 @@
 #lftp -d -c 'open -u "sftp_user","sftp_password" ftp://127.0.0.1
 #get files/testfile -o testfolder
 
+if [ $# -eq 0 ]; then
+    echo "No arguments supplied"
+    exit 123
+fi
+
 if [ $1 -gt 0 ]; then
 	echo "This parameter is 0 - (Current record)"
 	echo "Or negaive number - (Historical record)"
 	exit 124
 fi
+
+USER=$(whoami)
 
 #parameters to be edited for local environment
 # the technical user

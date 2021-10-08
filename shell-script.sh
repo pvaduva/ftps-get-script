@@ -31,7 +31,7 @@ fi
 
 #parameters to be edited for local environment
 # the technical user
-USER=TA06546
+USER=TA06547
 
 # the ftps servers addres
 FTPS_HOST=IT7E.intranet.unicredit.it
@@ -41,7 +41,7 @@ FTPS_PORT=921
 FILESRC=QQ.NAS.BX.DDD.UPDTNDG.XIBM.NET
 
 # hte NAS mount point
-FILEDST=/opt/FileNet/shared/FileStores
+FILEDST=/opt/FileNet/shared/host
 
 #Test connection with remote server
 lftp -c "open -e \"set ftps:initial-prot; \

@@ -1,9 +1,46 @@
 #!/bin/bash
 
+#Test for the existance of arguments
+if [ $# -eq 0 ]; then
+    echo "No arguments supplied"
+    exit 123
+fi
+
 if [ $1 -gt 0 ]; then
 	echo "This parameter is 0 - (Current record)"
 	echo "Or negaive number - (Historical record)"
 	exit 124
+fi
+
+USER=$(whoami)
+
+
+if [ $USER = TA06547 ]; then
+	# the technical user
+	TUSER=TA06547
+
+	# the ftps servers addres
+	FTPS_HOST=IT7E.intranet.unicredit.it
+	FTPS_PORT=921
+
+	# the name of the required file
+	FILESRC=QQ.NAS.BX.DDD.UPDTNDG.XIBM.NET
+
+	# hte NAS mount point
+	FILEDST=/opt/FileNet/shared/host
+elif [ $USER = TA06548 ]; then
+	# the technical user
+	TUSER=TA06548
+
+	# the ftps servers addres
+	FTPS_HOST=IT8E.intranet.unicredit.it
+	FTPS_PORT=921
+
+	# the name of the required file
+	FILESRC=QE.NAS.BX.DDD.UPDTNDG.XIBM.NET
+
+	# hte NAS mount point
+	FILEDST=/opt/FileNet/shared/host
 fi
 
 #Password retrieving procedure
@@ -34,20 +71,6 @@ else
 	
 	TPASS=$(echo $OUT | awk -F"," '{print $1}')
 fi
-
-#parameters to be edited for local environment
-# the technical user
-USER=TA06546
-
-# the ftps servers addres
-FTPS_HOST=IT7E.intranet.unicredit.it
-FTPS_PORT=921
-
-# the name of the required file
-FILESRC=QQ.NAS.BX.DDD.UPDTNDG.XIBM.NET
-
-# hte NAS mount point
-FILEDST=/opt/FileNet/shared/FileStores
 
 #Test connection with remote server
 lftp -c "open -e \"set ftps:initial-prot; \
