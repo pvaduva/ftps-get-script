@@ -25,21 +25,24 @@ fi
 # is passed as environment variable USER than 
 # this line can be deleted
 USER=$(whoami)
-
+BACKUPSERV=false
+RAND1=$((1 + $RANDOM % 10000))
 # if the technical user is passed as different
 # environment variable that replace $USER with 
 # $WHATEVER variable is used for the technical 
 # user
-if [ $USER = TA06547 ]; then
+if [ $USER = TA06546 ]; then
 	# the technical user QQ env
-	TUSER=TA06547
+	TUSER=TA06546
 
 	# the ftps servers addres QQ
-	FTPS_HOST=IT7E.intranet.unicredit.it
+	FTPS_HOST=IT5A.intranet.unicredit.it
+	FTPS_HOST2=IT5B.intranet.unicredit.it
 	FTPS_PORT=921
+	FTPS_PORT2=921
 
 	# the name of the required file QQ
-	FILESRC=QQ.NAS.BX.DDD.UPDTNDG.XIBM.NET
+	FILESRC=QE.NAS.BX.DDD.UPDTNDG.XIBM.NET
 
 	# hte NAS mount point QQ
 	FILEDST=/opt/FileNet/shared/host
@@ -49,10 +52,12 @@ elif [ $USER = TA06548 ]; then
 
 	# the ftps servers addres for PROD
 	FTPS_HOST=IT7A.intranet.unicredit.it
+	FTPS_HOST2=IT7B.intranet.unicredit.it
 	FTPS_PORT=921
+	FTPS_PORT2=921
 
 	# the name of the required file PROD env
-	FILESRC=QE.NAS.BX.DDD.UPDTNDG.XIBM.NET
+	FILESRC=PP.NAS.BX.DDD.UPDTNDG.XIBM.NET
 
 	# hte NAS mount point for PROD env
 	FILEDST=/opt/FileNet/shared/host
@@ -92,18 +97,31 @@ lftp -c "open -e \"set ftps:initial-prot; \
 	set ssl:verify-certificate false; \
 	set ftp:ssl-protect-data true; \"\
 	-u "${TUSER}","${TPASS}" \
-	ftp://${FTPS_HOST}:${FTPS_PORT}; ls ${FILESRC}*" > "/tmp/temp.file"
+	ftp://${FTPS_HOST}:${FTPS_PORT}; ls ${FILESRC}*" > "/tmp/temp${RAND1}.file"
 RC=$?
 if [ $RC -ne 0 ]; then
-	echo "Error: connection to ftps server failed"
-	exit $RC
+	echo "Connection to ${FTPS_HOST} is down"
+	echo "trying to connect to ${FTPS_HOST2}"
+	#Test connection with remote server
+	lftp -c "open -e \"set ftps:initial-prot; \
+		set ftp:ssl-force true; \
+		set ssl:verify-certificate false; \
+		set ftp:ssl-protect-data true; \"\
+		-u "${TUSER}","${TPASS}" \
+		ftp://${FTPS_HOST2}:${FTPS_PORT2}; ls ${FILESRC}*" > "/tmp/temp${RAND1}.file"
+	RC=$?
+	if [ $RC -ne 0 ]; then
+		echo "Error: connection to ftps server failed"
+		exit $RC
+	BACKUPSERV=true
+	fi
 fi
 
-lista=$(awk '{ print $9 }' /tmp/temp.file)
+lista=$(awk '{ print $9 }' /tmp/temp${RAND1}.file)
 arr=($lista)
 
 # remove the temp file
-rm /tmp/temp.file
+rm /tmp/temp${RAND1}.file
 
 if [ ${#arr[@]} -le ${1#-} ]; then
        echo "The history of the record is not kept that long"
@@ -114,14 +132,25 @@ fi
 FILESRC=${arr[$1]}
 
 #copy the desired file using sftp protocol, user and password
-lftp -c "open -e \"set ftps:initial-prot; \
-        set ftp:ssl-force true; \
-	set ssl:verify-certificate false; \
-        set ftp:ssl-protect-data true; \"\
-        -u "${TUSER}","${TPASS}" \
-        ftp://${FTPS_HOST}:${FTPS_PORT};
-
-get ${FILESRC} -o ${FILEDST}; exit"
+if [ $BACKUPSERV = false ]; then
+	lftp -c "open -e \"set ftps:initial-prot; \
+	        set ftp:ssl-force true; \
+		set ssl:verify-certificate false; \
+	        set ftp:ssl-protect-data true; \"\
+	        -u "${TUSER}","${TPASS}" \
+	        ftp://${FTPS_HOST}:${FTPS_PORT};
+	
+	get ${FILESRC} -o ${FILEDST}; exit"
+else
+	lftp -c "open -e \"set ftps:initial-prot; \
+	        set ftp:ssl-force true; \
+		set ssl:verify-certificate false; \
+	        set ftp:ssl-protect-data true; \"\
+	        -u "${TUSER}","${TPASS}" \
+	        ftp://${FTPS_HOST2}:${FTPS_PORT2};
+	
+	get ${FILESRC} -o ${FILEDST}; exit"
+fi
 
 #Test for ftps connection success and throw error otherwisse
 RC=$?
