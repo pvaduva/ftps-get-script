@@ -84,7 +84,7 @@ lftp -c "open -e \"set ftps:initial-prot; \
 	set ftp:ssl-force true; \
 	set ftp:ssl-protect-data true; \"\
 	-u "${TUSER}","${TPASS}" \
-	${FTPS_HOST}; ls ${FILESRC}*"
+	ftp://${FTPS_HOST}:${FTPS_PORT}; ls ${FILESRC}*"
 RC=$?
 if [ $RC -ne 0 ]; then
 	echo "Connection to ${FTPS_HOST} is down"
@@ -94,7 +94,7 @@ if [ $RC -ne 0 ]; then
 		set ftp:ssl-force true; \
 		set ftp:ssl-protect-data true; \"\
 		-u "${TUSER}","${TPASS}" \
-		${FTPS_HOST2}; ls ${FILESRC}*"
+		ftp://${FTPS_HOST2}:${FTPS_PORT2}; ls ${FILESRC}*"
 	RC=$?
 	if [ $RC -ne 0 ]; then
 		echo "Error: connection to ftps server failed"
@@ -109,7 +109,7 @@ if [ $BACKUPSERV = false ]; then
 	        set ftp:ssl-force true; \
 	        set ftp:ssl-protect-data true; \"\
 	        -u "${TUSER}","${TPASS}" \
-	        ${FTPS_HOST};
+	        ftp://${FTPS_HOST}:${FTPS_PORT};
 
 	get ${FILESRC} -o ${FILEDST}; exit"
 else
@@ -117,7 +117,7 @@ else
 	        set ftp:ssl-force true; \
 	        set ftp:ssl-protect-data true; \"\
 	        -u "${TUSER}","${TPASS}" \
-	        ${FTPS_HOST2};
+	        ftp://${FTPS_HOST2}:${FTPS_PORT2};
 
 	get ${FILESRC} -o ${FILEDST}; exit"
 fi
