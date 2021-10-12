@@ -120,7 +120,7 @@ arr=($lista)
 # remove the temp file
 rm /tmp/temp-bash-${RAND1}.file
 
-if [ ${#arr[@]} -le ${2#-} ]; then
+if [ ${#arr[@]} -le ${version#-} ]; then
        echo "The history of the record is not kept that long"
        exit 125
 fi
