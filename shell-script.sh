@@ -1,5 +1,56 @@
 #!/bin/bash
 
+#Test for the existance of arguments
+if [ $# -lt 2 ]; then
+	echo "Not enough arguments supplied"
+	exit 123
+fi
+
+FILESRC=$2
+BACKUPSERV=false
+RAND1=$((1 + $RANDOM % 10000))
+if [ $1 = QQ ]; then
+	# the technical user QQ env
+	TUSER=TA06547
+
+	# the ftps servers addres QQ
+	FTPS_HOST=IT7E.intranet.unicredit.it
+	FTPS_HOST2=IT7E.intranet.unicredit.it
+	FTPS_PORT=921
+	FTPS_PORT2=921
+
+	# hte NAS mount point QQ
+	FILEDST=/opt/FileNet/shared/host
+elif [ $1 = QE ]; then
+	# the technical user for PROD env
+	TUSER=TA06546
+
+	# the ftps servers addres for PROD
+	FTPS_HOST=IT5A.intranet.unicredit.it
+	FTPS_HOST2=IT5B.intranet.unicredit.it
+	FTPS_PORT=921
+	FTPS_PORT2=921
+
+	# hte NAS mount point for PROD env
+	FILEDST=/opt/FileNet/shared/host
+elif [ $1 = HV ]; then
+	# the technical user for PROD env
+	TUSER=TA06548
+
+	# the ftps servers addres for PROD
+	FTPS_HOST=IT7A.intranet.unicredit.it
+	FTPS_HOST2=IT7B.intranet.unicredit.it
+	FTPS_PORT=921
+	FTPS_PORT2=921
+
+	# hte NAS mount point for PROD env
+	FILEDST=/opt/FileNet/shared/host
+else
+	echo "The environment is not valid"
+	echo "it should be QQ QE or VN"
+	exit 124
+fi
+
 #Password retrieving procedure
 PasswordRetrived=0
 while [ $PasswordRetrived -eq 0 ] ; do
@@ -25,44 +76,51 @@ if [ $PasswordRetrived -eq 0 ] ; then
 	echo "Error: Password could not be retrieved"
 	exit $RC
 else
-	
 	TPASS=$(echo $OUT | awk -F"," '{print $1}')
 fi
-
-#parameters to be edited for local environment
-# the technical user
-USER=TA06547
-
-# the ftps servers addres
-FTPS_HOST=IT7E.intranet.unicredit.it
-FTPS_PORT=921
-
-# the name of the required file
-FILESRC=QQ.NAS.BX.DDD.UPDTNDG.XIBM.NET
-
-# hte NAS mount point
-FILEDST=/opt/FileNet/shared/host
 
 #Test connection with remote server
 lftp -c "open -e \"set ftps:initial-prot; \
 	set ftp:ssl-force true; \
 	set ftp:ssl-protect-data true; \"\
 	-u "${TUSER}","${TPASS}" \
-	ftp://${FTPS_HOST}:${FTPS_PORT}; ls"
+	${FTPS_HOST}; ls ${FILESRC}*"
 RC=$?
 if [ $RC -ne 0 ]; then
-	echo "Error: connection to ftps server failed"
-	exit $RC
+	echo "Connection to ${FTPS_HOST} is down"
+	echo "trying to connect to ${FTPS_HOST2}"
+	#Test connection with remote server
+	lftp -c "open -e \"set ftps:initial-prot; \
+		set ftp:ssl-force true; \
+		set ftp:ssl-protect-data true; \"\
+		-u "${TUSER}","${TPASS}" \
+		${FTPS_HOST2}; ls ${FILESRC}*"
+	RC=$?
+	if [ $RC -ne 0 ]; then
+		echo "Error: connection to ftps server failed"
+		exit $RC
+	fi
+	BACKUPSERV=true
 fi
 
 #copy the desired file using sftp protocol, user and password
-lftp -c "open -e \"set ftps:initial-prot; \
-        set ftp:ssl-force true; \
-        set ftp:ssl-protect-data true; \"\
-        -u "${TUSER}","${TPASS}" \
-        ftp://${FTPS_HOST}:${FTPS_PORT};
+if [ $BACKUPSERV = false ]; then
+	lftp -c "open -e \"set ftps:initial-prot; \
+	        set ftp:ssl-force true; \
+	        set ftp:ssl-protect-data true; \"\
+	        -u "${TUSER}","${TPASS}" \
+	        ${FTPS_HOST};
 
-get ${FILESRC} -o ${FILEDST}; exit"
+	get ${FILESRC} -o ${FILEDST}; exit"
+else
+	lftp -c "open -e \"set ftps:initial-prot; \
+	        set ftp:ssl-force true; \
+	        set ftp:ssl-protect-data true; \"\
+	        -u "${TUSER}","${TPASS}" \
+	        ${FTPS_HOST2};
+
+	get ${FILESRC} -o ${FILEDST}; exit"
+fi
 
 #Test for ftps connection success and throw error otherwisse
 RC=$?

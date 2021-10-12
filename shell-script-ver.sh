@@ -1,11 +1,4 @@
 #!/bin/bash
-#script intended for downloading user file
-#through ftps inteded for both QQ and PROD
-#environments the distinction being done 
-#with the help of the technical user either
-#linux user which should be known by the 
-#script
-
 
 #Test for the existance of arguments
 if [ $# -eq 0 ]; then
@@ -19,18 +12,9 @@ if [ $1 -gt 0 ]; then
 	exit 124
 fi
 
-# Assumes the technical user is the one that is 
-# used to execute the script as local linux user
-# if that is not the case and the technical user
-# is passed as environment variable USER than 
-# this line can be deleted
 USER=$(whoami)
 BACKUPSERV=false
 RAND1=$((1 + $RANDOM % 10000))
-# if the technical user is passed as different
-# environment variable that replace $USER with 
-# $WHATEVER variable is used for the technical 
-# user
 if [ $USER = TA06547 ]; then
 	# the technical user QQ env
 	TUSER=TA06547

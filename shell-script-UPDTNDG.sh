@@ -1,11 +1,4 @@
 #!/bin/bash
-#script intended for downloading user file
-#through ftps inteded for both QQ and PROD
-#environments the distinction being done 
-#with the help of the technical user either
-#linux user which should be known by the 
-#script
-
 
 #Test for the existance of arguments
 if [ $# -eq 0 ]; then
@@ -13,25 +6,16 @@ if [ $# -eq 0 ]; then
 	exit 123
 fi
 
-if [ $1 -gt 0 ]; then
+if [ $2 -gt 0 ]; then
 	echo "This parameter is 0 - (Current record)"
 	echo "Or negaive number - (Historical record)"
 	exit 124
 fi
 
-# Assumes the technical user is the one that is 
-# used to execute the script as local linux user
-# if that is not the case and the technical user
-# is passed as environment variable USER than 
-# this line can be deleted
-USER=$(whoami)
+version=$2
 BACKUPSERV=false
 RAND1=$((1 + $RANDOM % 10000))
-# if the technical user is passed as different
-# environment variable that replace $USER with 
-# $WHATEVER variable is used for the technical 
-# user
-if [ $USER = TA06547 ]; then
+if [ $1 = QQ ]; then
 	# the technical user QQ env
 	TUSER=TA06547
 
@@ -40,13 +24,24 @@ if [ $USER = TA06547 ]; then
 	FTPS_HOST2=IT7E.intranet.unicredit.it
 	FTPS_PORT=921
 	FTPS_PORT2=921
-
-	# the name of the required file QQ
 	FILESRC=QQ.NAS.BX.DDD.UPDTNDG.XIBM.NET
 
 	# hte NAS mount point QQ
 	FILEDST=/opt/FileNet/shared/host
-elif [ $USER = TA06548 ]; then
+elif [ $1 = QE ]; then
+	# the technical user for PROD env
+	TUSER=TA06546
+
+	# the ftps servers addres for PROD
+	FTPS_HOST=IT5A.intranet.unicredit.it
+	FTPS_HOST2=IT5B.intranet.unicredit.it
+	FTPS_PORT=921
+	FTPS_PORT2=921
+	FILESRC=QE.NAS.BX.DDD.UPDTNDG.XIBM.NET
+
+	# hte NAS mount point for PROD env
+	FILEDST=/opt/FileNet/shared/host
+elif [ $1 = HV ]; then
 	# the technical user for PROD env
 	TUSER=TA06548
 
@@ -55,12 +50,14 @@ elif [ $USER = TA06548 ]; then
 	FTPS_HOST2=IT7B.intranet.unicredit.it
 	FTPS_PORT=921
 	FTPS_PORT2=921
-
-	# the name of the required file PROD env
 	FILESRC=HV.NAS.BX.DDD.UPDTNDG.XIBM.NET
 
 	# hte NAS mount point for PROD env
 	FILEDST=/opt/FileNet/shared/host
+else
+	echo "The environment is not valid"
+	echo "it should be QQ QE or VN"
+	exit 124
 fi
 
 #Password retrieving procedure
@@ -97,7 +94,7 @@ lftp -c "open -e \"set ftps:initial-prot; \
 	set ssl:verify-certificate false; \
 	set ftp:ssl-protect-data true; \"\
 	-u "${TUSER}","${TPASS}" \
-	ftp://${FTPS_HOST}:${FTPS_PORT}; ls ${FILESRC}*" > "/tmp/temp${RAND1}.file"
+	${FTPS_HOST}; ls ${FILESRC}*" > "/tmp/temp-bash-${RAND1}.file"
 RC=$?
 if [ $RC -ne 0 ]; then
 	echo "Connection to ${FTPS_HOST} is down"
@@ -108,28 +105,29 @@ if [ $RC -ne 0 ]; then
 		set ssl:verify-certificate false; \
 		set ftp:ssl-protect-data true; \"\
 		-u "${TUSER}","${TPASS}" \
-		ftp://${FTPS_HOST2}:${FTPS_PORT2}; ls ${FILESRC}*" > "/tmp/temp${RAND1}.file"
+		${FTPS_HOST2}; ls ${FILESRC}*" > "/tmp/temp-bash-${RAND1}.file"
 	RC=$?
 	if [ $RC -ne 0 ]; then
 		echo "Error: connection to ftps server failed"
 		exit $RC
-	BACKUPSERV=true
 	fi
+	BACKUPSERV=true
 fi
 
-lista=$(awk '{ print $9 }' /tmp/temp${RAND1}.file)
+lista=$(awk '{ print $9 }' /tmp/temp-bash-${RAND1}.file)
 arr=($lista)
 
 # remove the temp file
-rm /tmp/temp${RAND1}.file
+rm /tmp/temp-bash-${RAND1}.file
 
-if [ ${#arr[@]} -le ${1#-} ]; then
+if [ ${#arr[@]} -le ${2#-} ]; then
        echo "The history of the record is not kept that long"
        exit 125
 fi
 
 # the name of the required file
-FILESRC=${arr[$1]}
+version=$((version-1))
+FILESRC=${arr[$version]}
 
 #copy the desired file using sftp protocol, user and password
 if [ $BACKUPSERV = false ]; then
@@ -138,7 +136,7 @@ if [ $BACKUPSERV = false ]; then
 		set ssl:verify-certificate false; \
 	        set ftp:ssl-protect-data true; \"\
 	        -u "${TUSER}","${TPASS}" \
-	        ftp://${FTPS_HOST}:${FTPS_PORT};
+	        ${FTPS_HOST};
 	
 	get ${FILESRC} -o ${FILEDST}; exit"
 else
@@ -147,7 +145,7 @@ else
 		set ssl:verify-certificate false; \
 	        set ftp:ssl-protect-data true; \"\
 	        -u "${TUSER}","${TPASS}" \
-	        ftp://${FTPS_HOST2}:${FTPS_PORT2};
+	        ${FTPS_HOST2};
 	
 	get ${FILESRC} -o ${FILEDST}; exit"
 fi
