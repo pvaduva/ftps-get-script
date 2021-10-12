@@ -57,7 +57,7 @@ elif [ $USER = TA06548 ]; then
 	FTPS_PORT2=921
 
 	# the name of the required file PROD env
-	FILESRC=HP.NAS.BX.DDD.DELMRNDG.XIBM.NET
+	FILESRC=HV.NAS.BX.DDD.DELMRNDG.XIBM.NET
 
 	# hte NAS mount point for PROD env
 	FILEDST=/opt/FileNet/shared/host
