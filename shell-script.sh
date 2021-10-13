@@ -37,6 +37,7 @@ exec 1>"${FILEDST}${LOGFILE}-$(date +%F-%T).log" 2>&1
 #Test for the existance of arguments
 if [ $# -lt 2 ]; then
 	echo "Not enough arguments supplied"
+	echo "shell-script.sh [ENV] [FILENAME]"
 	exit 123
 fi
 

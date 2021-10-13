@@ -3,6 +3,7 @@
 #Test for the existance of arguments
 if [ $# -eq 0 ]; then
 	echo "No arguments supplied"
+	echo "shell-script.sh [ENV] [FILENAME]"
 	exit 123
 fi
 
