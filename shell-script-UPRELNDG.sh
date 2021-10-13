@@ -1,5 +1,19 @@
 #!/bin/bash
 
+if [ $1 = QQ ]; then
+	FILEDST="/opt/FileNet/shared/host/"
+elif [ $1 = QE ]; then
+	FILEDST="/opt/FileNet/shared/host/"
+elif [ $1 = HV ]; then
+	FILEDST="/opt/FileNet/shared/host/"
+fi
+LOGFILE="sftp-download"
+
+exec 3>&1 4>&2
+trap 'exec 2>&4 1>&3' 0 1 2 3
+exec 1>"${FILEDST}${LOGFILE}-$(date +%F-%T).log" 2>&1
+
+
 #Test for the existance of arguments
 if [ $# -eq 0 ]; then
 	echo "No arguments supplied"
@@ -192,3 +206,5 @@ if [ $RC -ne 0 ]; then
 	echo "Error: file already present on NAS storage"
 	exit $RC
 fi
+
+find ${FILEDST}${LOGFILE}*.log -mtime +10 -type f -delete
