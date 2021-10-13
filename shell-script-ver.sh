@@ -68,6 +68,7 @@ done
 # Test if password has been retrieved and throw 
 # error if not
 if [ $PasswordRetrived -eq 0 ] ; then
+	echo "RETC = ${RC}"
 	echo $OUT
 	echo "Error: Password could not be retrieved"
 	exit $RC

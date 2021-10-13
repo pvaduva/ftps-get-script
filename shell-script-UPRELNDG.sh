@@ -36,6 +36,7 @@ exec 1>"${FILEDST}${LOGFILE}-$(date +%F-%T).log" 2>&1
 
 #Test for the existance of arguments
 if [ $# -eq 0 ]; then
+	echo "RETC = 123"
 	echo "No arguments supplied"
 	exit 123
 fi
@@ -91,6 +92,7 @@ fi
 # Test if password has been retrieved and throw 
 # error if not
 if [ $PasswordRetrived -eq 0 ] ; then
+	echo "RETC = ${RC}"
 	echo $OUT
 	echo "Error: Password could not be retrieved"
 	exit $RC
