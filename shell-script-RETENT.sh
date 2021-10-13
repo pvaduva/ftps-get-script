@@ -82,9 +82,6 @@ elif [ $1 = HV ]; then
 	FTPS_PORT=921
 	FTPS_PORT2=921
 	FILESRC=HV.NAS.BX.DDD.RETENT.XIBM.NET
-
-	# hte NAS mount point for PROD env
-	FILEDST=/opt/FileNet/shared/host
 else
 	echo "The environment is not valid"
 	echo "it should be QQ QE or VN"

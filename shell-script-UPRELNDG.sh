@@ -60,9 +60,6 @@ if [ $1 = QQ ]; then
 	FTPS_PORT=921
 	FTPS_PORT2=921
 	FILESRC=QQ.NAS.BX.DDD.UPRELNDG.XIBM.NET
-
-	# hte NAS mount point QQ
-	FILEDST=/opt/FileNet/shared/host
 elif [ $1 = QE ]; then
 	connect_to_cyberark "AIM_DDD" "AIM_DDD" "TA06546_RACF_MILANO_DDD"
 	# the technical user for PROD env
@@ -74,9 +71,6 @@ elif [ $1 = QE ]; then
 	FTPS_PORT=921
 	FTPS_PORT2=921
 	FILESRC=QE.NAS.BX.DDD.UPRELNDG.XIBM.NET
-
-	# hte NAS mount point for PROD env
-	FILEDST=/opt/FileNet/shared/host
 elif [ $1 = HV ]; then
 	connect_to_cyberark "AIM_DDD" "AIM_DDD_DEV" "TA06548_RACF_MILANO_DDD"
 	# the technical user for PROD env
@@ -88,9 +82,6 @@ elif [ $1 = HV ]; then
 	FTPS_PORT=921
 	FTPS_PORT2=921
 	FILESRC=HV.NAS.BX.DDD.UPRELNDG.XIBM.NET
-
-	# hte NAS mount point for PROD env
-	FILEDST=/opt/FileNet/shared/host
 else
 	echo "The environment is not valid"
 	echo "it should be QQ QE or VN"
