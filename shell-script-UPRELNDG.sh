@@ -16,6 +16,24 @@ version=$2
 BACKUPSERV=false
 RAND1=$((1 + $RANDOM % 10000))
 if [ $1 = QQ ]; then
+	#Password retrieving procedure
+	PasswordRetrived=0
+	while [ $PasswordRetrived -eq 0 ] ; do
+		OUT=`clipasswordsdk GetPassword -p AppDescs.AppID=AIM_DDD \
+		       	-p Query="Safe=AIM_DDD_QA;Folder=Root;Object=TA06547_RACF_MILANO_DDD" \ 
+		       	-p FailRequestOnPasswordChange=false -o Password,PasswordChangeInProcess 2>&1`
+		RC = $?
+		if [ $RC -ne 0 ] ; then
+			break
+		fi
+		InProcess=`echo $OUT | awk -F"," '{print $2}'`
+		if [ "$InProcess" != "true" ] ; then
+			PasswordRetrived=1
+		else
+			sleep 1.5
+		fi
+	done
+
 	# the technical user QQ env
 	TUSER=TA06547
 
@@ -29,6 +47,24 @@ if [ $1 = QQ ]; then
 	# hte NAS mount point QQ
 	FILEDST=/opt/FileNet/shared/host
 elif [ $1 = QE ]; then
+	#Password retrieving procedure
+	PasswordRetrived=0
+	while [ $PasswordRetrived -eq 0 ] ; do
+		OUT=`clipasswordsdk GetPassword -p AppDescs.AppID=AIM_DDD \
+		       	-p Query="Safe=AIM_DDD;Folder=Root;Object=TA06546_RACF_MILANO_DDD" \ 
+		       	-p FailRequestOnPasswordChange=false -o Password,PasswordChangeInProcess 2>&1`
+		RC = $?
+		if [ $RC -ne 0 ] ; then
+			break
+		fi
+		InProcess=`echo $OUT | awk -F"," '{print $2}'`
+		if [ "$InProcess" != "true" ] ; then
+			PasswordRetrived=1
+		else
+			sleep 1.5
+		fi
+	done
+
 	# the technical user for PROD env
 	TUSER=TA06546
 
@@ -42,6 +78,24 @@ elif [ $1 = QE ]; then
 	# hte NAS mount point for PROD env
 	FILEDST=/opt/FileNet/shared/host
 elif [ $1 = HV ]; then
+	#Password retrieving procedure
+	PasswordRetrived=0
+	while [ $PasswordRetrived -eq 0 ] ; do
+		OUT=`clipasswordsdk GetPassword -p AppDescs.AppID=AIM_DDD \
+		       	-p Query="Safe=AIM_DDD_DEV;Folder=Root;Object=TA06548_RACF_MILANO_DDD" \ 
+		       	-p FailRequestOnPasswordChange=false -o Password,PasswordChangeInProcess 2>&1`
+		RC = $?
+		if [ $RC -ne 0 ] ; then
+			break
+		fi
+		InProcess=`echo $OUT | awk -F"," '{print $2}'`
+		if [ "$InProcess" != "true" ] ; then
+			PasswordRetrived=1
+		else
+			sleep 1.5
+		fi
+	done
+
 	# the technical user for PROD env
 	TUSER=TA06548
 
@@ -59,24 +113,6 @@ else
 	echo "it should be QQ QE or VN"
 	exit 124
 fi
-
-#Password retrieving procedure
-PasswordRetrived=0
-while [ $PasswordRetrived -eq 0 ] ; do
-	OUT=`clipasswordsdk GetPassword -p AppDescs.AppID=AIM_appcode \
-	       	-p Query="Safe=AIM_appcode_env;Folder=Root;Object=xxxxxxx" \ 
-	       	-p FailRequestOnPasswordChange=false -o Password,PasswordChangeInProcess 2>&1`
-	RC = $?
-	if [ $RC -ne 0 ] ; then
-		break
-	fi
-	InProcess=`echo $OUT | awk -F"," '{print $2}'`
-	if [ "$InProcess" != "true" ] ; then
-		PasswordRetrived=1
-	else
-		sleep 1.5
-	fi
-done
 
 # Test if password has been retrieved and throw 
 # error if not
