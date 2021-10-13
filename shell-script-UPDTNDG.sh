@@ -1,5 +1,25 @@
 #!/bin/bash
 
+connect_to_cyberark () {
+	#Password retrieving procedure
+	PasswordRetrived=0
+	while [ $PasswordRetrived -eq 0 ] ; do
+		OUT=`clipasswordsdk GetPassword -p AppDescs.AppID=${1} \
+		       	-p Query="Safe=${2};Folder=Root;Object=${3}" \ 
+		       	-p FailRequestOnPasswordChange=false -o Password,PasswordChangeInProcess 2>&1`
+		RC = $?
+		if [ $RC -ne 0 ] ; then
+			break
+		fi
+		InProcess=`echo $OUT | awk -F"," '{print $2}'`
+		if [ "$InProcess" != "true" ] ; then
+			PasswordRetrived=1
+		else
+			sleep 1.5
+		fi
+	done
+}
+
 if [ $1 = QQ ]; then
 	FILEDST="/opt/FileNet/shared/host/"
 elif [ $1 = QE ]; then
@@ -30,24 +50,7 @@ version=$2
 BACKUPSERV=false
 RAND1=$((1 + $RANDOM % 10000))
 if [ $1 = QQ ]; then
-	#Password retrieving procedure
-	PasswordRetrived=0
-	while [ $PasswordRetrived -eq 0 ] ; do
-		OUT=`clipasswordsdk GetPassword -p AppDescs.AppID=AIM_DDD \
-		       	-p Query="Safe=AIM_DDD_QA;Folder=Root;Object=TA06547_RACF_MILANO_DDD" \ 
-		       	-p FailRequestOnPasswordChange=false -o Password,PasswordChangeInProcess 2>&1`
-		RC = $?
-		if [ $RC -ne 0 ] ; then
-			break
-		fi
-		InProcess=`echo $OUT | awk -F"," '{print $2}'`
-		if [ "$InProcess" != "true" ] ; then
-			PasswordRetrived=1
-		else
-			sleep 1.5
-		fi
-	done
-
+	connect_to_cyberark "AIM_DDD" "AIM_DDD_QA" "TA06547_RACF_MILANO_DDD"
 	# the technical user QQ env
 	TUSER=TA06547
 
@@ -61,24 +64,7 @@ if [ $1 = QQ ]; then
 	# hte NAS mount point QQ
 	FILEDST=/opt/FileNet/shared/host
 elif [ $1 = QE ]; then
-	#Password retrieving procedure
-	PasswordRetrived=0
-	while [ $PasswordRetrived -eq 0 ] ; do
-		OUT=`clipasswordsdk GetPassword -p AppDescs.AppID=AIM_DDD \
-		       	-p Query="Safe=AIM_DDD;Folder=Root;Object=TA06546_RACF_MILANO_DDD" \ 
-		       	-p FailRequestOnPasswordChange=false -o Password,PasswordChangeInProcess 2>&1`
-		RC = $?
-		if [ $RC -ne 0 ] ; then
-			break
-		fi
-		InProcess=`echo $OUT | awk -F"," '{print $2}'`
-		if [ "$InProcess" != "true" ] ; then
-			PasswordRetrived=1
-		else
-			sleep 1.5
-		fi
-	done
-
+	connect_to_cyberark "AIM_DDD" "AIM_DDD" "TA06546_RACF_MILANO_DDD"
 	# the technical user for PROD env
 	TUSER=TA06546
 
@@ -92,24 +78,7 @@ elif [ $1 = QE ]; then
 	# hte NAS mount point for PROD env
 	FILEDST=/opt/FileNet/shared/host
 elif [ $1 = HV ]; then
-	#Password retrieving procedure
-	PasswordRetrived=0
-	while [ $PasswordRetrived -eq 0 ] ; do
-		OUT=`clipasswordsdk GetPassword -p AppDescs.AppID=AIM_DDD \
-		       	-p Query="Safe=AIM_DDD_DEV;Folder=Root;Object=TA06548_RACF_MILANO_DDD" \ 
-		       	-p FailRequestOnPasswordChange=false -o Password,PasswordChangeInProcess 2>&1`
-		RC = $?
-		if [ $RC -ne 0 ] ; then
-			break
-		fi
-		InProcess=`echo $OUT | awk -F"," '{print $2}'`
-		if [ "$InProcess" != "true" ] ; then
-			PasswordRetrived=1
-		else
-			sleep 1.5
-		fi
-	done
-
+	connect_to_cyberark "AIM_DDD" "AIM_DDD_DEV" "TA06548_RACF_MILANO_DDD"
 	# the technical user for PROD env
 	TUSER=TA06548
 
