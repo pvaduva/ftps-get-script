@@ -20,7 +20,7 @@ connect_to_cyberark () {
 	done
 }
 
-if [ $1 = QQ ]; then
+if [ $1 = QP ]; then
 	FILEDST="/opt/FileNet/shared/host/"
 elif [ $1 = QE ]; then
 	FILEDST="/opt/FileNet/shared/host/"
@@ -37,14 +37,14 @@ exec 1>"${FILEDST}${LOGFILE}-$(date +%F-%T).log" 2>&1
 #Test for the existance of arguments
 if [ $# -lt 2 ]; then
 	echo "Not enough arguments supplied"
-	echo "shell-script.sh [ENV] [FILENAME]"
+	echo "shell-script.sh [ENV[QE/QP/HV]] [FILENAME]"
 	exit 123
 fi
 
 FILESRC=$2
 BACKUPSERV=false
 RAND1=$((1 + $RANDOM % 10000))
-if [ $1 = QQ ]; then
+if [ $1 = QP ]; then
 	connect_to_cyberark "AIM_DDD" "AIM_DDD_QA" "TA06547_RACF_MILANO_DDD"
 	# the technical user QQ env
 	TUSER=TA06547
@@ -77,7 +77,7 @@ elif [ $1 = HV ]; then
 else
 	echo "RETC = 124"
 	echo "The environment is not valid"
-	echo "it should be QQ QE or VN"
+	echo "it should be QP QE or HV"
 	exit 124
 fi
 

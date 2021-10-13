@@ -38,7 +38,7 @@ exec 1>"${FILEDST}${LOGFILE}-$(date +%F-%T).log" 2>&1
 if [ $# -eq 0 ]; then
 	echo "RETC = 123"
 	echo "No arguments supplied"
-	echo "shell-script.sh [ENV] [-DAYS]"
+	echo "shell-script.sh [ENV[QE/QP/HV]] [-DAYS]"
 	exit 123
 fi
 

@@ -20,7 +20,7 @@ connect_to_cyberark () {
 	done
 }
 
-if [ $1 = QQ ]; then
+if [ $1 = QP ]; then
 	FILEDST="/opt/FileNet/shared/host/"
 elif [ $1 = QE ]; then
 	FILEDST="/opt/FileNet/shared/host/"
@@ -38,7 +38,7 @@ exec 1>"${FILEDST}${LOGFILE}-$(date +%F-%T).log" 2>&1
 if [ $# -eq 0 ]; then
 	echo "RETC = 123"
 	echo "No arguments supplied"
-	echo "shell-script.sh [ENV] [-DAYS]"
+	echo "shell-script.sh [ENV[QE/QP/HV]] [-DAYS]"
 	exit 123
 fi
 
