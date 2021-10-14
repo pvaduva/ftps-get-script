@@ -20,7 +20,7 @@ connect_to_cyberark () {
 	done
 }
 
-if [ $1 = QP ]; then
+if [ $1 = QQ ]; then
 	FILEDST="/opt/FileNet/shared/host/"
 elif [ $1 = QE ]; then
 	FILEDST="/opt/FileNet/shared/host/"
@@ -37,14 +37,14 @@ exec 1>"${FILEDST}${LOGFILE}-$(date +%F-%T).log" 2>&1
 #Test for the existance of arguments
 if [ $# -lt 2 ]; then
 	echo "Not enough arguments supplied"
-	echo "shell-script.sh [ENV[QE/QP/HV]] [FILENAME]"
+	echo "shell-script.sh [ENV[QE/QQ/HV]] [FILENAME]"
 	exit 123
 fi
 
 FILESRC=$2
 BACKUPSERV=false
 RAND1=$((1 + $RANDOM % 10000))
-if [ $1 = QP ]; then
+if [ $1 = QQ ]; then
 	connect_to_cyberark "AIM_DDD" "AIM_DDD_QA" "TA06547_RACF_MILANO_DDD"
 	# the technical user QQ env
 	TUSER=TA06547
@@ -55,7 +55,7 @@ if [ $1 = QP ]; then
 	FTPS_PORT=921
 	FTPS_PORT2=921
 elif [ $1 = QE ]; then
-	connect_to_cyberark "AIM_DDD" "AIM_DDD" "TA06546_RACF_MILANO_DDD"
+	connect_to_cyberark "AIM_DDD" "AIM_DDD_DEV" "TA06546_RACF_MILANO_DDD"
 	# the technical user for PROD env
 	TUSER=TA06546
 
@@ -65,7 +65,7 @@ elif [ $1 = QE ]; then
 	FTPS_PORT=921
 	FTPS_PORT2=921
 elif [ $1 = HV ]; then
-	connect_to_cyberark "AIM_DDD" "AIM_DDD_DEV" "TA06548_RACF_MILANO_DDD"
+	connect_to_cyberark "AIM_DDD" "AIM_DDD" "TA06548_RACF_MILANO_DDD"
 	# the technical user for PROD env
 	TUSER=TA06548
 
@@ -77,7 +77,7 @@ elif [ $1 = HV ]; then
 else
 	echo "RETC = 124"
 	echo "The environment is not valid"
-	echo "it should be QP QE or HV"
+	echo "it should be QQ QE or HV"
 	exit 124
 fi
 

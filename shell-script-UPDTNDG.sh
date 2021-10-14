@@ -63,7 +63,7 @@ if [ $1 = QQ ]; then
 	FTPS_PORT2=921
 	FILESRC=QQ.NAS.BX.DDD.UPDTNDG.XIBM.NET
 elif [ $1 = QE ]; then
-	connect_to_cyberark "AIM_DDD" "AIM_DDD" "TA06546_RACF_MILANO_DDD"
+	connect_to_cyberark "AIM_DDD" "AIM_DDD_DEV" "TA06546_RACF_MILANO_DDD"
 	# the technical user for PROD env
 	TUSER=TA06546
 
@@ -74,7 +74,7 @@ elif [ $1 = QE ]; then
 	FTPS_PORT2=921
 	FILESRC=QE.NAS.BX.DDD.UPDTNDG.XIBM.NET
 elif [ $1 = HV ]; then
-	connect_to_cyberark "AIM_DDD" "AIM_DDD_DEV" "TA06548_RACF_MILANO_DDD"
+	connect_to_cyberark "AIM_DDD" "AIM_DDD" "TA06548_RACF_MILANO_DDD"
 	# the technical user for PROD env
 	TUSER=TA06548
 

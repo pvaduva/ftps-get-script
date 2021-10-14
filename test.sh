@@ -53,7 +53,7 @@ lftp -c "open -e \"set ftps:initial-prot; \
 	set ssl:verify-certificate false; \
 	set ftp:ssl-protect-data true; \"\
 	-u "${TUSER}","${TPASS}" \
-	${FTPS_HOST}; ls ${FILESRC}*" > "/tmp/temp.file"
+	${FTPS_HOST}; ls ${FILESRC}*" | tee "/tmp/temp.file"
 RC=$?
 if [ $RC -ne 0 ]; then
 	echo "RC = ${RC}"
