@@ -7,7 +7,7 @@ connect_to_cyberark () {
 		OUT=`clipasswordsdk GetPassword -p AppDescs.AppID=${1} \
 		       	-p Query="Safe=${2};Folder=Root;Object=${3}" \ 
 		       	-p FailRequestOnPasswordChange=false -o Password,PasswordChangeInProcess 2>&1`
-		RC = $?
+		RC=$?
 		if [ $RC -ne 0 ] ; then
 			break
 		fi
@@ -22,12 +22,12 @@ connect_to_cyberark () {
 
 if [ $1 = QQ ]; then
 	POSTURL="https://ddd-cpe-qq.validazione.usinet.it/DDMEGABatch/"
-	FILEDST="/home/tudddf3/"
+	FILEDST="/opt/FileNet/shared/Host/"
 elif [ $1 = QE ]; then
 	POSTURL="https://ddd-cpe-qe.collaudo.usinet.it/DDMEGABatch/"
-	FILEDST="/home/tudddf3/"
+	FILEDST="/opt/FileNet/shared/Host/"
 elif [ $1 = HV ]; then
-	FILEDST="/home/tudddf3/"
+	FILEDST="/opt/FileNet/shared/Host/"
 fi
 LOGFILE="sftp-download"
 
