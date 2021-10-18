@@ -21,8 +21,10 @@ connect_to_cyberark () {
 }
 
 if [ $1 = QQ ]; then
+	POSTURL="https://ddd-cpe-qq.validazione.usinet.it/DDMEGABatch/"
 	FILEDST="/opt/FileNet/shared/host/"
 elif [ $1 = QE ]; then
+	POSTURL="https://ddd-cpe-qe.collaudo.usinet.it/DDMEGABatch/"
 	FILEDST="/opt/FileNet/shared/host/"
 elif [ $1 = HV ]; then
 	FILEDST="/opt/FileNet/shared/host/"
@@ -168,6 +170,26 @@ RC=$?
 if [ $RC -ne 0 ]; then
 	echo "Error: file already present on NAS storage"
 	exit $RC
+fi
+
+readarray -d . -t strarr <<<"${FILESRC}"
+
+FILETYPE=${strarr[4]}
+
+#start FileNet processing
+HTTPS_POST_RC=4
+curl -u <user>:<password> -X POST -F "file=${FILEDST}${FILESRC}" -F "type=${FILETYPE}" ${POSTURL}startJob
+
+while [ ${HTTPS_POST_RC} = 4 ]
+do
+	HTTPS_POST_RC=curl -u <user>:<password> -X POST -F "file=${FILEDST}${FILESRC}" -F "type=${FILETYPE}" -w "%{http_code}" ${POSTURL}checkJob
+	sleep 5m
+done
+
+if [ $HTTPS_POST_RC -ne 0 ]; then
+	echo "RETC = ${HTTPS_POST_RC}"
+	echo "Error: the FileNet processing failed"
+	exit $HTTPS_POST_RC
 fi
 
 find ${FILEDST}${LOGFILE}*.log -mtime +10 -type f -delete
