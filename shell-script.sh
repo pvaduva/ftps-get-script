@@ -18,15 +18,30 @@ connect_to_cyberark () {
 			sleep 1.5
 		fi
 	done
+
+	# Test if password has been retrieved and throw
+	# error if not
+	if [ $PasswordRetrived -eq 0 ] ; then
+		echo $OUT
+		echo "Error: Password could not be retrieved"
+		exit $RC
+	else
+		CPASS=$(echo $OUT | awk -F"," '{print $1}')
+	fi
+
 }
 
 if [ $1 = QQ ]; then
 	POSTURL="https://ddd-cpe-qq.validazione.usinet.it/DDMEGABatch/"
+	#Modify this 
 	FILEDST="/home/tudddf3/"
 elif [ $1 = QE ]; then
 	POSTURL="https://ddd-cpe-qe.collaudo.usinet.it/DDMEGABatch/"
+	#Modify this 
 	FILEDST="/home/tudddf3/"
 elif [ $1 = HV ]; then
+	POSTURL="https://ddd-cpe-hv.intranet.usinet.it/DDMEGABatch/"
+	#Modify this 
 	FILEDST="/home/tudddf3/"
 fi
 LOGFILE="sftp-download"
@@ -47,30 +62,42 @@ FILESRC=$2
 BACKUPSERV=false
 RAND1=$((1 + $RANDOM % 10000))
 if [ $1 = QQ ]; then
-	connect_to_cyberark "AIM_DDD" "AIM_DDD_QA" "TA06547_RACF_MILANO_DDD"
-	# the technical user QQ env
+	POSTUSER=$(whoami)
 	TUSER=TA06547
-
+	connect_to_cyberark "AIM_DDD" "AIM_DDD_QA" "${POSTUSER^^}_LDPUGDUS_DDD"
+	POSTPASS=${CPASS}
+	unset CPASS
+	connect_to_cyberark "AIM_DDD" "AIM_DDD_QA" "${TUSER^^}_RACF_MILANO_DDD"
+	# the technical user QQ env
+	TPASS=${CPASS}
 	# the ftps servers addres QQ
 	FTPS_HOST=IT7E.intranet.unicredit.it
 	FTPS_HOST2=IT7E.intranet.unicredit.it
 	FTPS_PORT=921
 	FTPS_PORT2=921
 elif [ $1 = QE ]; then
-	connect_to_cyberark "AIM_DDD" "AIM_DDD_DEV" "TA06546_RACF_MILANO_DDD"
-	# the technical user for PROD env
+	POSTUSER=$(whoami)
 	TUSER=TA06546
-
+	connect_to_cyberark "AIM_DDD" "AIM_DDD_DEV" "${POSTUSER^^}_LDPUGDUS_DDD"
+	POSTPASS=${CPASS}
+	unset CPASS
+	connect_to_cyberark "AIM_DDD" "AIM_DDD_DEV" "${TUSER^^}_RACF_MILANO_DDD"
+	# the technical user for PROD env
+	TPASS=${CPASS}
 	# the ftps servers addres for PROD
 	FTPS_HOST=IT5A.intranet.unicredit.it
 	FTPS_HOST2=IT5B.intranet.unicredit.it
 	FTPS_PORT=921
 	FTPS_PORT2=921
 elif [ $1 = HV ]; then
-	connect_to_cyberark "AIM_DDD" "AIM_DDD" "TA06548_RACF_MILANO_DDD"
-	# the technical user for PROD env
+	POSTUSER=$(whoami)
 	TUSER=TA06548
-
+	connect_to_cyberark "AIM_DDD" "AIM_DDD" "${POSTUSER^^}_LDPUGDUS_DDD"
+	POSTPASS=${CPASS}
+	unset CPASS
+	connect_to_cyberark "AIM_DDD" "AIM_DDD" "${TUSER^^}_RACF_MILANO_DDD"
+	# the technical user for PROD env
+	TPASS=${CPASS}
 	# the ftps servers addres for PROD
 	FTPS_HOST=IT7A.intranet.unicredit.it
 	FTPS_HOST2=IT7B.intranet.unicredit.it
@@ -81,16 +108,6 @@ else
 	echo "The environment is not valid"
 	echo "it should be QQ QE or HV"
 	exit 124
-fi
-
-# Test if password has been retrieved and throw 
-# error if not
-if [ $PasswordRetrived -eq 0 ] ; then
-	echo $OUT
-	echo "Error: Password could not be retrieved"
-	exit $RC
-else
-	TPASS=$(echo $OUT | awk -F"," '{print $1}')
 fi
 
 #Test connection with remote server
@@ -144,17 +161,18 @@ if [ $RC -ne 0 ]; then
 	exit $RC
 fi
 
+#Determine the type of the files from it's name
 readarray -d . -t strarr <<<"${FILESRC}"
 
 FILETYPE=${strarr[4]}
 
 #start FileNet processing
 HTTPS_POST_RC=4
-curl -u <user>:<password> -X POST -F "file=${FILEDST}${FILESRC}" -F "type=${FILETYPE}" ${POSTURL}startJob
+curl -u ${POSTUSER}:${POSTPASS} -X POST -F "file=${FILEDST}${FILESRC}" -F "type=${FILETYPE}" ${POSTURL}startJob
 
 while [ ${HTTPS_POST_RC} = 4 ]
 do
-	HTTPS_POST_RC=curl -u <user>:<password> -X POST -F "file=${FILEDST}${FILESRC}" -F "type=${FILETYPE}" -w "%{http_code}" ${POSTURL}checkJob
+	HTTPS_POST_RC=curl -u ${POSTUSER}:${POSTPASS} -X POST -F "file=${FILEDST}${FILESRC}" -F "type=${FILETYPE}" -w "%{http_code}" ${POSTURL}checkJob
 	sleep 5m
 done
 
