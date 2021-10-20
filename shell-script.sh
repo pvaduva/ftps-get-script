@@ -4,9 +4,9 @@ connect_to_cyberark () {
 	#Password retrieving procedure
 	PasswordRetrived=0
 	while [ $PasswordRetrived -eq 0 ] ; do
-		OUT=`/opt/CARKaim/sdk/clipasswordsdk GetPassword -p AppDescs.AppID=${1} \
-		       	-p Query="Safe=${2};Folder=Root;Object=${3}" \ 
-		       	-p FailRequestOnPasswordChange=false -o Password,PasswordChangeInProcess 2>&1`
+		OUT=$(/opt/CARKaim/sdk/clipasswordsdk GetPassword -p AppDescs.AppID=${1} \
+			-p Query="Safe=${2};Folder=Root;Object=${3}" \
+			-p FailRequestOnPasswordChange=false -o Password,PasswordChangeInProcess 2>&1)
 		RC=$?
 		if [ $RC -ne 0 ] ; then
 			break
