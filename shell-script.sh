@@ -23,7 +23,7 @@ connect_to_cyberark () {
 	# error if not
 	if [ $PasswordRetrived -eq 0 ] ; then
 		echo $OUT
-		echo "Error: Password could not be retrieved"
+		echo "Error: Password for user ${3} could not be retrieved"
 		exit $RC
 	else
 		CPASS=$(echo $OUT | awk -F"," '{print $1}')
@@ -34,15 +34,15 @@ connect_to_cyberark () {
 if [ $1 = QQ ]; then
 	POSTURL="https://ddd-cpe-qq.validazione.usinet.it/DDMEGABatch/"
 	#Modify this 
-	FILEDST="/home/tudddf3/"
+	FILEDST="/opt/FileNet/shared/host/"
 elif [ $1 = QE ]; then
 	POSTURL="https://ddd-cpe-qe.collaudo.usinet.it/DDMEGABatch/"
 	#Modify this 
-	FILEDST="/home/tudddf3/"
+	FILEDST="/opt/FileNet/shared/host/"
 elif [ $1 = HV ]; then
 	POSTURL="https://ddd-cpe-hv.intranet.usinet.it/DDMEGABatch/"
 	#Modify this 
-	FILEDST="/home/tudddf3/"
+	FILEDST="/opt/FileNet/shared/host/"
 fi
 LOGFILE="sftp-download"
 
@@ -70,11 +70,9 @@ if [ $1 = QQ ]; then
 	connect_to_cyberark "AIM_DDD" "AIM_DDD_QA" "${TUSER^^}_RACF_MILANO_DDD"
 	# the technical user QQ env
 	TPASS=${CPASS}
-	# the ftps servers addres QQ
-	FTPS_HOST=IT7E.intranet.unicredit.it
-	FTPS_HOST2=IT7E.intranet.unicredit.it
-	FTPS_PORT=921
-	FTPS_PORT2=921
+	# the ftp servers addres QQ
+	SFTP_HOST=IT7E.intranet.unicredit.it
+	SFTP_HOST2=IT7E.intranet.unicredit.it
 elif [ $1 = QE ]; then
 	POSTUSER=$(whoami)
 	TUSER=TA06546
@@ -84,11 +82,9 @@ elif [ $1 = QE ]; then
 	connect_to_cyberark "AIM_DDD" "AIM_DDD_DEV" "${TUSER^^}_RACF_MILANO_DDD"
 	# the technical user for PROD env
 	TPASS=${CPASS}
-	# the ftps servers addres for PROD
-	FTPS_HOST=IT5A.intranet.unicredit.it
-	FTPS_HOST2=IT5B.intranet.unicredit.it
-	FTPS_PORT=921
-	FTPS_PORT2=921
+	# the sftp servers addres for PROD
+	SFTP_HOST=IT5A.intranet.unicredit.it
+	SFTP_HOST2=IT5C.intranet.unicredit.it
 elif [ $1 = HV ]; then
 	POSTUSER=$(whoami)
 	TUSER=TA06548
@@ -98,11 +94,9 @@ elif [ $1 = HV ]; then
 	connect_to_cyberark "AIM_DDD" "AIM_DDD" "${TUSER^^}_RACF_MILANO_DDD"
 	# the technical user for PROD env
 	TPASS=${CPASS}
-	# the ftps servers addres for PROD
-	FTPS_HOST=IT7A.intranet.unicredit.it
-	FTPS_HOST2=IT7B.intranet.unicredit.it
-	FTPS_PORT=921
-	FTPS_PORT2=921
+	# the sftp servers addres for PROD
+	SFTP_HOST=IT7A.intranet.unicredit.it
+	SFTP_HOST2=IT7B.intranet.unicredit.it
 else
 	echo "RETC = 124"
 	echo "The environment is not valid"
@@ -111,24 +105,24 @@ else
 fi
 
 #Test connection with remote server
-lftp -c "open -e \"set ftps:initial-prot; \
-	set ftp:ssl-force true; \
-	set ftp:ssl-protect-data true; \"\
+lftp -c "open -e \"set ssl:verify-certificate no; \
+	set sftp:auto-confirm yes;\"\
 	-u "${TUSER}","${TPASS}" \
-	${FTPS_HOST}; ls ${FILESRC}*"
+	${SFTP_HOST}; ls ${FILESRC}*"
 RC=$?
 if [ $RC -ne 0 ]; then
-	echo "Connection to ${FTPS_HOST} is down"
-	echo "trying to connect to ${FTPS_HOST2}"
+	echo "Error: connection to sftp server ${SFTP_HOST2} failed"
+	echo "RETC = $RC"
+	echo "trying to connect to ${SFTP_HOST2}"
 	#Test connection with remote server
-	lftp -c "open -e \"set ftps:initial-prot; \
-		set ftp:ssl-force true; \
-		set ftp:ssl-protect-data true; \"\
+	lftp -c "open -e \"set ssl:verify-certificate no; \
+		set sftp:auto-confirm yes;\"\
 		-u "${TUSER}","${TPASS}" \
-		${FTPS_HOST2}; ls ${FILESRC}*"
+		${SFTP_HOST2}; ls ${FILESRC}*"
 	RC=$?
 	if [ $RC -ne 0 ]; then
-		echo "Error: connection to ftps server failed"
+		echo "Error: connection to backup sftp server failed"
+		echo "RETC = $RC"
 		exit $RC
 	fi
 	BACKUPSERV=true
@@ -136,24 +130,22 @@ fi
 
 #copy the desired file using sftp protocol, user and password
 if [ $BACKUPSERV = false ]; then
-	lftp -c "open -e \"set ftps:initial-prot; \
-	        set ftp:ssl-force true; \
-	        set ftp:ssl-protect-data true; \"\
+	lftp -c "open -e \"set ssl:verify-certificate no; \
+		set sftp:auto-confirm yes;\"\
 	        -u "${TUSER}","${TPASS}" \
-	        ${FTPS_HOST};
+	        ${SFTP_HOST};
 
 	get ${FILESRC} -o ${FILEDST}; exit"
 else
-	lftp -c "open -e \"set ftps:initial-prot; \
-	        set ftp:ssl-force true; \
-	        set ftp:ssl-protect-data true; \"\
+	lftp -c "open -e \"set ssl:verify-certificate no; \
+		set sftp:auto-confirm yes;\"\
 	        -u "${TUSER}","${TPASS}" \
-	        ${FTPS_HOST2};
+	        ${SFTP_HOST2};
 
 	get ${FILESRC} -o ${FILEDST}; exit"
 fi
 
-#Test for ftps connection success and throw error otherwisse
+#Test for sftp connection success and throw error otherwisse
 RC=$?
 if [ $RC -ne 0 ]; then
 	echo "RETC = ${RC}"
