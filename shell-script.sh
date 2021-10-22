@@ -64,37 +64,48 @@ RAND1=$((1 + $RANDOM % 10000))
 if [ $1 = QQ ]; then
 	POSTUSER=tudddft
 	TUSER=ta06547
+	NASUSER=tuddds2
 	connect_to_cyberark "AIM_DDD" "AIM_DDD_QA" "${POSTUSER^^}_LDPUGDUS_DDD"
 	POSTPASS=${CPASS}
 	unset CPASS
 	connect_to_cyberark "AIM_DDD" "AIM_DDD_QA" "${TUSER^^}_RACF_MILANO_DDD"
-	# the technical user QQ env
 	TPASS=${CPASS}
+	unset CPASS
+	connect_to_cyberark "AIM_DDD" "AIM_DDD_QA" "${NASUSER^^}_LDPUGDUS_DDD"
+	NASPASS=${CPASS}
+	unset CPASS
 	# the ftp servers addres QQ
 	SFTP_HOST=IT7E.intranet.unicredit.it
 	SFTP_HOST2=IT7E.intranet.unicredit.it
 elif [ $1 = QE ]; then
 	POSTUSER=tudddfm
 	TUSER=ta06546
+	NASUSER=tuddds1
 	connect_to_cyberark "AIM_DDD" "AIM_DDD_DEV" "${POSTUSER^^}_LDPUGDUS_DDD"
 	POSTPASS=${CPASS}
 	unset CPASS
 	connect_to_cyberark "AIM_DDD" "AIM_DDD_DEV" "${TUSER^^}_RACF_MILANO_DDD"
-	# the technical user for PROD env
 	TPASS=${CPASS}
+	unset CPASS
+	connect_to_cyberark "AIM_DDD" "AIM_DDD_DEV" "${NASUSER^^}_LDPUGDUS_DDD"
+	NASPASS=${CPASS}
+	unset CPASS
 	# the sftp servers addres for PROD
 	SFTP_HOST=IT5A.intranet.unicredit.it
 	SFTP_HOST2=IT5C.intranet.unicredit.it
 elif [ $1 = HV ]; then
 	POSTUSER=tudddf3
 	TUSER=ta06548
+	NASUSER=tuddds3
 	connect_to_cyberark "AIM_DDD" "AIM_DDD" "${POSTUSER^^}_LDPUGDUS_DDD"
 	POSTPASS=${CPASS}
 	unset CPASS
 	connect_to_cyberark "AIM_DDD" "AIM_DDD" "${TUSER^^}_RACF_MILANO_DDD"
-	# the technical user for PROD env
 	TPASS=${CPASS}
-	# the sftp servers addres for PROD
+	unset CPASS
+	connect_to_cyberark "AIM_DDD" "AIM_DDD" "${NASUSER^^}_RACF_MILANO_DDD"
+	NASPASS=${CPASS}
+	unset CPASS
 	SFTP_HOST=IT7A.intranet.unicredit.it
 	SFTP_HOST2=IT7B.intranet.unicredit.it
 else
@@ -106,6 +117,7 @@ fi
 
 #Test connection with remote server
 lftp -c "open -e \"set ssl:verify-certificate no; \
+	set net:max-retries 3; \
 	set sftp:auto-confirm yes;\"\
 	-u "${TUSER}","${TPASS}" \
 	${SFTP_HOST}; ls ${FILESRC}*"
@@ -116,6 +128,7 @@ if [ $RC -ne 0 ]; then
 	echo "trying to connect to ${SFTP_HOST2}"
 	#Test connection with remote server
 	lftp -c "open -e \"set ssl:verify-certificate no; \
+		set net:max-retries 3; \
 		set sftp:auto-confirm yes;\"\
 		-u "${TUSER}","${TPASS}" \
 		${SFTP_HOST2}; ls ${FILESRC}*"
@@ -130,28 +143,37 @@ fi
 
 #copy the desired file using sftp protocol, user and password
 if [ $BACKUPSERV = false ]; then
-	lftp -c "open -e \"set ssl:verify-certificate no; \
-		set sftp:auto-confirm yes;\"\
-	        -u "${TUSER}","${TPASS}" \
-	        ${SFTP_HOST};
-
-	get ${FILESRC} -o ${FILEDST}; exit"
+	SFTP_H=${SFTP_HOST}
 else
-	lftp -c "open -e \"set ssl:verify-certificate no; \
-		set sftp:auto-confirm yes;\"\
-	        -u "${TUSER}","${TPASS}" \
-	        ${SFTP_HOST2};
-
-	get ${FILESRC} -o ${FILEDST}; exit"
+	SFTP_H=${SFTP_HOST2}
 fi
 
+rm ${HOME}/${FILESRC}
+
+lftp -c "open -e \"set ssl:verify-certificate no; \
+	set net:max-retries 3; \
+	set sftp:auto-confirm yes;\"\
+        -u "${TUSER}","${TPASS}" \
+        ${SFTP_H};
+
+get ${FILESRC} -o ${HOME}/; exit"
 #Test for sftp connection success and throw error otherwisse
 RC=$?
 if [ $RC -ne 0 ]; then
 	echo "RETC = ${RC}"
-	echo "Error: file already present on NAS storage or no access to NAS mount"
-	exit $RC
+	echo "Error: download failed"
+	exit ${RC}
 fi
+
+#while [ $RC -ne 0 ]
+#do
+#   command1
+#   command2
+#   command3
+#done
+
+sudo runuser -l  ${NASUSER} -c "cp ${HOME}/${FILESRC} ${FILEDST}/"
+#sshpass -p "${NASPASS}" scp $FILESRC ${NASUSER}@127.0.0.1:${FILEDST}
 
 #Determine the type of the files from it's name
 readarray -d . -t strarr <<<"${FILESRC}"
