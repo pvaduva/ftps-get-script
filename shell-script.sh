@@ -28,6 +28,7 @@ connect_to_cyberark () {
 	else
 		CPASS=$(echo $OUT | awk -F"," '{print $1}')
 	fi
+	echo $OUT
 
 }
 
@@ -62,7 +63,7 @@ FILESRC=$2
 BACKUPSERV=false
 RAND1=$((1 + $RANDOM % 10000))
 if [ $1 = QQ ]; then
-	POSTUSER=tudddft
+	POSTUSER=tudddfm
 	TUSER=ta06547
 	NASUSER=tuddds2
 	connect_to_cyberark "AIM_DDD" "AIM_DDD_QA" "${POSTUSER^^}_LDPUGDUS_DDD"
@@ -71,14 +72,14 @@ if [ $1 = QQ ]; then
 	connect_to_cyberark "AIM_DDD" "AIM_DDD_QA" "${TUSER^^}_RACF_MILANO_DDD"
 	TPASS=${CPASS}
 	unset CPASS
-	connect_to_cyberark "AIM_DDD" "AIM_DDD_QA" "${NASUSER^^}_LDPUGDUS_DDD"
+	connect_to_cyberark "AIM_DDD" "AIM_DDD_QA" "${NASUSER^^}_RACF_MILANO_DDD"
 	NASPASS=${CPASS}
 	unset CPASS
 	# the ftp servers addres QQ
 	SFTP_HOST=IT7E.intranet.unicredit.it
 	SFTP_HOST2=IT7E.intranet.unicredit.it
 elif [ $1 = QE ]; then
-	POSTUSER=tudddfm
+	POSTUSER=tudddft
 	TUSER=ta06546
 	NASUSER=tuddds1
 	connect_to_cyberark "AIM_DDD" "AIM_DDD_DEV" "${POSTUSER^^}_LDPUGDUS_DDD"
@@ -87,7 +88,7 @@ elif [ $1 = QE ]; then
 	connect_to_cyberark "AIM_DDD" "AIM_DDD_DEV" "${TUSER^^}_RACF_MILANO_DDD"
 	TPASS=${CPASS}
 	unset CPASS
-	connect_to_cyberark "AIM_DDD" "AIM_DDD_DEV" "${NASUSER^^}_LDPUGDUS_DDD"
+	connect_to_cyberark "AIM_DDD" "AIM_DDD_DEV" "${NASUSER^^}_RACF_MILANO_DDD"
 	NASPASS=${CPASS}
 	unset CPASS
 	# the sftp servers addres for PROD
