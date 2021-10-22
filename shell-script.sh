@@ -34,15 +34,15 @@ connect_to_cyberark () {
 if [ $1 = QQ ]; then
 	POSTURL="https://ddd-cpe-qq.validazione.usinet.it/DDMEGABatch/"
 	#Modify this 
-	FILEDST="/opt/FileNet/shared/host/"
+	FILEDST="/opt/FileNet/shared/Host/"
 elif [ $1 = QE ]; then
 	POSTURL="https://ddd-cpe-qe.collaudo.usinet.it/DDMEGABatch/"
 	#Modify this 
-	FILEDST="/opt/FileNet/shared/host/"
+	FILEDST="/opt/FileNet/shared/Host/"
 elif [ $1 = HV ]; then
 	POSTURL="https://ddd-cpe-hv.intranet.usinet.it/DDMEGABatch/"
 	#Modify this 
-	FILEDST="/opt/FileNet/shared/host/"
+	FILEDST="/opt/FileNet/shared/Host/"
 fi
 LOGFILE="sftp-download"
 
@@ -62,8 +62,8 @@ FILESRC=$2
 BACKUPSERV=false
 RAND1=$((1 + $RANDOM % 10000))
 if [ $1 = QQ ]; then
-	POSTUSER=$(whoami)
-	TUSER=TA06547
+	POSTUSER=tudddft
+	TUSER=ta06547
 	connect_to_cyberark "AIM_DDD" "AIM_DDD_QA" "${POSTUSER^^}_LDPUGDUS_DDD"
 	POSTPASS=${CPASS}
 	unset CPASS
@@ -74,8 +74,8 @@ if [ $1 = QQ ]; then
 	SFTP_HOST=IT7E.intranet.unicredit.it
 	SFTP_HOST2=IT7E.intranet.unicredit.it
 elif [ $1 = QE ]; then
-	POSTUSER=$(whoami)
-	TUSER=TA06546
+	POSTUSER=tudddfm
+	TUSER=ta06546
 	connect_to_cyberark "AIM_DDD" "AIM_DDD_DEV" "${POSTUSER^^}_LDPUGDUS_DDD"
 	POSTPASS=${CPASS}
 	unset CPASS
@@ -86,8 +86,8 @@ elif [ $1 = QE ]; then
 	SFTP_HOST=IT5A.intranet.unicredit.it
 	SFTP_HOST2=IT5C.intranet.unicredit.it
 elif [ $1 = HV ]; then
-	POSTUSER=$(whoami)
-	TUSER=TA06548
+	POSTUSER=tudddf3
+	TUSER=ta06548
 	connect_to_cyberark "AIM_DDD" "AIM_DDD" "${POSTUSER^^}_LDPUGDUS_DDD"
 	POSTPASS=${CPASS}
 	unset CPASS
