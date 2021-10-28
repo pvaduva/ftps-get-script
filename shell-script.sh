@@ -65,7 +65,6 @@ RAND1=$((1 + $RANDOM % 10000))
 if [ $1 = QQ ]; then
 	POSTUSER=tudddfm
 	TUSER=ta06547
-	NASUSER=tuddds2
 	connect_to_cyberark "AIM_DDD" "AIM_DDD_QA" "${POSTUSER^^}_LDPUGDUS_DDD"
 	POSTPASS=${CPASS}
 	unset CPASS
@@ -78,7 +77,6 @@ if [ $1 = QQ ]; then
 elif [ $1 = QE ]; then
 	POSTUSER=tudddft
 	TUSER=ta06546
-	NASUSER=tuddds1
 	connect_to_cyberark "AIM_DDD" "AIM_DDD_DEV" "${POSTUSER^^}_LDPUGDUS_DDD"
 	POSTPASS=${CPASS}
 	unset CPASS
@@ -91,7 +89,6 @@ elif [ $1 = QE ]; then
 elif [ $1 = HV ]; then
 	POSTUSER=tudddf3
 	TUSER=ta06548
-	NASUSER=tuddds3
 	connect_to_cyberark "AIM_DDD" "AIM_DDD" "${POSTUSER^^}_LDPUGDUS_DDD"
 	POSTPASS=${CPASS}
 	unset CPASS
@@ -107,23 +104,33 @@ else
 	exit 124
 fi
 
+export SSHPASS=${TPASS}
+
 #Test connection with remote server
-lftp -c "open -e \"set ssl:verify-certificate no; \
-	set net:max-retries 3; \
-	set sftp:auto-confirm yes;\"\
-	-u "${TUSER}","${TPASS}" \
-	${SFTP_HOST}; ls ${FILESRC}*"
+#lftp -c "open -e \"set ssl:verify-certificate no; \
+#	set net:max-retries 3; \
+#	set sftp:auto-confirm yes;\"\
+#	-u "${TUSER}","${TPASS}" \
+#	${SFTP_HOST}; ls ${FILESRC}*"
+
+sshpass -e sftp -oConnectTimeout=10 ${TUSER}@${SFTP_HOST} << !
+ls 
+!
+
 RC=$?
 if [ $RC -ne 0 ]; then
-	echo "Error: connection to sftp server ${SFTP_HOST2} failed"
+	echo "Error: connection to sftp server ${SFTP_HOST} failed"
 	echo "RETC = $RC"
 	echo "trying to connect to ${SFTP_HOST2}"
 	#Test connection with remote server
-	lftp -c "open -e \"set ssl:verify-certificate no; \
-		set net:max-retries 3; \
-		set sftp:auto-confirm yes;\"\
-		-u "${TUSER}","${TPASS}" \
-		${SFTP_HOST2}; ls ${FILESRC}*"
+sshpass -e sftp -oConnectTimeout=10 ${TUSER}@${SFTP_HOST2} << !
+ls 
+!
+#	lftp -c "open -e \"set ssl:verify-certificate no; \
+#		set net:max-retries 3; \
+#		set sftp:auto-confirm yes;\"\
+#		-u "${TUSER}","${TPASS}" \
+#		${SFTP_HOST2}; ls ${FILESRC}*"
 	RC=$?
 	if [ $RC -ne 0 ]; then
 		echo "Error: connection to backup sftp server failed"
@@ -142,13 +149,18 @@ fi
 
 rm ${HOME}/${FILESRC}
 
-lftp -c "open -e \"set ssl:verify-certificate no; \
-	set net:max-retries 3; \
-	set sftp:auto-confirm yes;\"\
-        -u "${TUSER}","${TPASS}" \
-        ${SFTP_H};
+#lftp -c "open -e \"set ssl:verify-certificate no; \
+#	set net:max-retries 3; \
+#	set sftp:auto-confirm yes;\"\
+#        -u "${TUSER}","${TPASS}" \
+#        ${SFTP_H};
+#
+#get ${FILESRC} -o ${HOME}/; exit"
 
-get ${FILESRC} -o ${HOME}/; exit"
+sshpass -e sftp -oConnectTimeout=10 ${TUSER}@${SFTP_H} << !
+get ${FILESRC}
+!
+
 #Test for sftp connection success and throw error otherwisse
 RC=$?
 if [ $RC -ne 0 ]; then
@@ -164,8 +176,7 @@ fi
 #   command3
 #done
 
-sudo runuser -l  ${NASUSER} -c "cp ${HOME}/${FILESRC} ${FILEDST}/"
-#sshpass -p "${NASPASS}" scp $FILESRC ${NASUSER}@127.0.0.1:${FILEDST}
+cp ${HOME}/${FILESRC} ${FILEDST}/
 
 #Determine the type of the files from it's name
 readarray -d . -t strarr <<<"${FILESRC}"
@@ -179,7 +190,7 @@ curl -u ${POSTUSER}:${POSTPASS} -X POST -F "file=${FILEDST}${FILESRC}" -F "type=
 while [ ${HTTPS_POST_RC} = 4 ]
 do
 	HTTPS_POST_RC=curl -u ${POSTUSER}:${POSTPASS} -X POST -F "file=${FILEDST}${FILESRC}" -F "type=${FILETYPE}" -w "%{http_code}" ${POSTURL}checkJob
-	sleep 5m
+	sleep 1m
 done
 
 if [ $HTTPS_POST_RC -ne 0 ]; then
