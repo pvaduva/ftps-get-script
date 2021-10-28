@@ -72,9 +72,6 @@ if [ $1 = QQ ]; then
 	connect_to_cyberark "AIM_DDD" "AIM_DDD_QA" "${TUSER^^}_RACF_MILANO_DDD"
 	TPASS=${CPASS}
 	unset CPASS
-	connect_to_cyberark "AIM_DDD" "AIM_DDD_QA" "${NASUSER^^}_RACF_MILANO_DDD"
-	NASPASS=${CPASS}
-	unset CPASS
 	# the ftp servers addres QQ
 	SFTP_HOST=IT7E.intranet.unicredit.it
 	SFTP_HOST2=IT7E.intranet.unicredit.it
@@ -88,9 +85,6 @@ elif [ $1 = QE ]; then
 	connect_to_cyberark "AIM_DDD" "AIM_DDD_DEV" "${TUSER^^}_RACF_MILANO_DDD"
 	TPASS=${CPASS}
 	unset CPASS
-	connect_to_cyberark "AIM_DDD" "AIM_DDD_DEV" "${NASUSER^^}_RACF_MILANO_DDD"
-	NASPASS=${CPASS}
-	unset CPASS
 	# the sftp servers addres for PROD
 	SFTP_HOST=IT5A.intranet.unicredit.it
 	SFTP_HOST2=IT5C.intranet.unicredit.it
@@ -103,9 +97,6 @@ elif [ $1 = HV ]; then
 	unset CPASS
 	connect_to_cyberark "AIM_DDD" "AIM_DDD" "${TUSER^^}_RACF_MILANO_DDD"
 	TPASS=${CPASS}
-	unset CPASS
-	connect_to_cyberark "AIM_DDD" "AIM_DDD" "${NASUSER^^}_RACF_MILANO_DDD"
-	NASPASS=${CPASS}
 	unset CPASS
 	SFTP_HOST=IT7A.intranet.unicredit.it
 	SFTP_HOST2=IT7B.intranet.unicredit.it
