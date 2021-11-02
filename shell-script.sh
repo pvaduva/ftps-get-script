@@ -185,11 +185,12 @@ FILETYPE=${strarr[4]}
 
 #start FileNet processing
 HTTPS_POST_RC=4
-curl -u ${POSTUSER}:${POSTPASS} -X POST -F "file=${FILEDST}${FILESRC}" -F "type=${FILETYPE}" ${POSTURL}startJob
+UUID_CODE=$(curl -u ${POSTUSER}:${POSTPASS} -X POST -F "file=${FILEDST}${FILESRC}" -F "type=${FILETYPE}" ${POSTURL}startJob)
 
 while [ ${HTTPS_POST_RC} = 4 ]
 do
-	HTTPS_POST_RC=curl -u ${POSTUSER}:${POSTPASS} -X POST -F "file=${FILEDST}${FILESRC}" -F "type=${FILETYPE}" -w "%{http_code}" ${POSTURL}checkJob
+#	HTTPS_POST_RC=curl -u ${POSTUSER}:${POSTPASS} -X POST -F "file=${FILEDST}${FILESRC}" -F "type=${FILETYPE}" -w "%{http_code}" ${POSTURL}checkJob
+HTTPS_POST_RC=$(curl -u ${POSTUSER}:${POSTPASS} -w "%{http_code}" ${POSTURL}checkJob?id=${UUID_CODE})
 	sleep 1m
 done
 
