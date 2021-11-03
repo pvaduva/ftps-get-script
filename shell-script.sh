@@ -28,21 +28,16 @@ connect_to_cyberark () {
 	else
 		CPASS=$(echo $OUT | awk -F"," '{print $1}')
 	fi
-	echo $OUT
-
 }
 
 if [ $1 = QQ ]; then
 	POSTURL="https://ddd-cpe-qq.validazione.usinet.it/DDMEGABatch/"
-	#Modify this 
 	FILEDST="/opt/FileNet/shared/Host/"
 elif [ $1 = QE ]; then
 	POSTURL="https://ddd-cpe-qe.collaudo.usinet.it/DDMEGABatch/"
-	#Modify this 
 	FILEDST="/opt/FileNet/shared/Host/"
 elif [ $1 = HV ]; then
 	POSTURL="https://ddd-cpe-hv.intranet.usinet.it/DDMEGABatch/"
-	#Modify this 
 	FILEDST="/opt/FileNet/shared/Host/"
 fi
 LOGFILE="sftp-download"
@@ -63,37 +58,25 @@ FILESRC=$2
 BACKUPSERV=false
 RAND1=$((1 + $RANDOM % 10000))
 if [ $1 = QQ ]; then
-	POSTUSER=tudddfm
-	TUSER=ta06547
-	connect_to_cyberark "AIM_DDD" "AIM_DDD_QA" "${POSTUSER^^}_LDPUGDUS_DDD"
+	POSTUSER=ta06547
+	connect_to_cyberark "AIM_DDD" "AIM_DDD_QA" "${POSTUSER^^}_RACF_MILANO_DDD"
 	POSTPASS=${CPASS}
-	unset CPASS
-	connect_to_cyberark "AIM_DDD" "AIM_DDD_QA" "${TUSER^^}_RACF_MILANO_DDD"
-	TPASS=${CPASS}
 	unset CPASS
 	# the ftp servers addres QQ
 	SFTP_HOST=IT7E.intranet.unicredit.it
 	SFTP_HOST2=IT7E.intranet.unicredit.it
 elif [ $1 = QE ]; then
-	POSTUSER=tudddft
-	TUSER=ta06546
-	connect_to_cyberark "AIM_DDD" "AIM_DDD_DEV" "${POSTUSER^^}_LDPUGDUS_DDD"
+	POSTUSER=ta06546
+	connect_to_cyberark "AIM_DDD" "AIM_DDD_DEV" "${POSTUSER^^}_RACF_MILANO_DDD"
 	POSTPASS=${CPASS}
-	unset CPASS
-	connect_to_cyberark "AIM_DDD" "AIM_DDD_DEV" "${TUSER^^}_RACF_MILANO_DDD"
-	TPASS=${CPASS}
 	unset CPASS
 	# the sftp servers addres for PROD
 	SFTP_HOST=IT5A.intranet.unicredit.it
 	SFTP_HOST2=IT5C.intranet.unicredit.it
 elif [ $1 = HV ]; then
-	POSTUSER=tudddf3
-	TUSER=ta06548
-	connect_to_cyberark "AIM_DDD" "AIM_DDD" "${POSTUSER^^}_LDPUGDUS_DDD"
+	POSTUSER=ta06548
+	connect_to_cyberark "AIM_DDD" "AIM_DDD" "${POSTUSER^^}_RACF_MILANO_DDD"
 	POSTPASS=${CPASS}
-	unset CPASS
-	connect_to_cyberark "AIM_DDD" "AIM_DDD" "${TUSER^^}_RACF_MILANO_DDD"
-	TPASS=${CPASS}
 	unset CPASS
 	SFTP_HOST=IT7A.intranet.unicredit.it
 	SFTP_HOST2=IT7B.intranet.unicredit.it
@@ -113,7 +96,7 @@ export SSHPASS=${TPASS}
 #	-u "${TUSER}","${TPASS}" \
 #	${SFTP_HOST}; ls ${FILESRC}*"
 
-sftp -oConnectTimeout=10 ${TUSER}@${SFTP_HOST} << !
+sftp -oConnectTimeout=10 ${POSTUSER}@${SFTP_HOST} << !
 ls 
 !
 
@@ -123,7 +106,7 @@ if [ $RC -ne 0 ]; then
 	echo "RETC = $RC"
 	echo "trying to connect to ${SFTP_HOST2}"
 	#Test connection with remote server
-sftp -oConnectTimeout=10 ${TUSER}@${SFTP_HOST2} << !
+sftp -oConnectTimeout=10 ${POSTUSER}@${SFTP_HOST2} << !
 ls 
 !
 #	lftp -c "open -e \"set ssl:verify-certificate no; \
@@ -157,7 +140,7 @@ rm ${HOME}/${FILESRC}
 #
 #get ${FILESRC} -o ${HOME}/; exit"
 
-sftp -oConnectTimeout=10 ${TUSER}@${SFTP_H} << !
+sftp -oConnectTimeout=10 ${POSTUSER}@${SFTP_H} << !
 get ${FILESRC}
 !
 
@@ -169,6 +152,11 @@ if [ $RC -ne 0 ]; then
 	exit ${RC}
 fi
 
+sftp -oConnectTimeout=10 ${POSTUSER}@${SFTP_H} << !
+rm ${FILESRC}
+!
+
+
 #while [ $RC -ne 0 ]
 #do
 #   command1
@@ -178,19 +166,50 @@ fi
 
 cp ${HOME}/${FILESRC} ${FILEDST}/
 
+#delete this
 #Determine the type of the files from it's name
-readarray -d . -t strarr <<<"${FILESRC}"
+#readarray -d . -t strarr <<<"${FILESRC}"
 
-FILETYPE=${strarr[4]}
+IFS='.' read -ra strarr <<< "${FILESRC}"
+
+echo ${strarr[4]}
+
+FILETYPE="${strarr[4]}"
+
+# if [ ${FILESRC} = "File_DelMrgNdg.txt" ]; then
+# FILETYPE="DELMRNDG"
+# elif [ ${FILESRC} = "File_UpRelNdg.txt" ]; then
+# FILETYPE="UPRELNDG"
+# elif [ ${FILESRC} = "File_Retent.txt" ]; then
+# FILETYPE="RETENT"
+# elif [ ${FILESRC} = "File_NdgUpdate.txt" ]; then
+# FILETYPE="UPDTNDG"
+# else
+# 	echo "Error: File type not supported"
+# 	echo "RC = 122"
+# 	exit 122
+# fi
 
 #start FileNet processing
 HTTPS_POST_RC=4
-UUID_CODE=$(curl -u ${POSTUSER}:${POSTPASS} -X POST -F "file=${FILEDST}${FILESRC}" -F "type=${FILETYPE}" ${POSTURL}startJob)
+UUID_CODE=$(curl -k -u ${POSTUSER}:${POSTPASS} -X POST -F "file=${FILEDST}${FILESRC}" -F "type=${FILETYPE}" ${POSTURL}startJob)
+
+RC=$?
+
+if [ $RC -ne 0 ]; then
+        echo "RETC = $RC"
+        echo "Error: the FileNet processing job failed to start"
+        exit $RC
+fi
+
+echo "uuid=${UUID_CODE}"
 
 while [ ${HTTPS_POST_RC} = 4 ]
 do
 #	HTTPS_POST_RC=curl -u ${POSTUSER}:${POSTPASS} -X POST -F "file=${FILEDST}${FILESRC}" -F "type=${FILETYPE}" -w "%{http_code}" ${POSTURL}checkJob
-HTTPS_POST_RC=$(curl -u ${POSTUSER}:${POSTPASS} -w "%{http_code}" ${POSTURL}checkJob?id=${UUID_CODE})
+HTTPS_POST_RC=$(curl -k -u ${POSTUSER}:${POSTPASS} ${POSTURL}checkJob?id=${UUID_CODE})
+
+echo "while RC =  ${HTTPS_POST_RC}"
 	sleep 1m
 done
 
