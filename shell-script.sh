@@ -113,7 +113,7 @@ export SSHPASS=${TPASS}
 #	-u "${TUSER}","${TPASS}" \
 #	${SFTP_HOST}; ls ${FILESRC}*"
 
-sshpass -e sftp -oConnectTimeout=10 ${TUSER}@${SFTP_HOST} << !
+sftp -oConnectTimeout=10 ${TUSER}@${SFTP_HOST} << !
 ls 
 !
 
@@ -123,7 +123,7 @@ if [ $RC -ne 0 ]; then
 	echo "RETC = $RC"
 	echo "trying to connect to ${SFTP_HOST2}"
 	#Test connection with remote server
-sshpass -e sftp -oConnectTimeout=10 ${TUSER}@${SFTP_HOST2} << !
+sftp -oConnectTimeout=10 ${TUSER}@${SFTP_HOST2} << !
 ls 
 !
 #	lftp -c "open -e \"set ssl:verify-certificate no; \
@@ -157,7 +157,7 @@ rm ${HOME}/${FILESRC}
 #
 #get ${FILESRC} -o ${HOME}/; exit"
 
-sshpass -e sftp -oConnectTimeout=10 ${TUSER}@${SFTP_H} << !
+sftp -oConnectTimeout=10 ${TUSER}@${SFTP_H} << !
 get ${FILESRC}
 !
 
