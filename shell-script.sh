@@ -37,7 +37,7 @@ elif [ $1 = QE ]; then
 	POSTURL="https://ddd-cpe-qe.collaudo.usinet.it/DDMEGABatch/"
 	FILEDST="/opt/FileNet/shared/Host/"
 elif [ $1 = HV ]; then
-	POSTURL="https://ddd-cpe-hv.intranet.usinet.it/DDMEGABatch/"
+	POSTURL="https://ddd-cpe-hv.intranet.unicredit.eu/DDMEGABatch/"
 	FILEDST="/opt/FileNet/shared/Host/"
 fi
 LOGFILE="sftp-download"
