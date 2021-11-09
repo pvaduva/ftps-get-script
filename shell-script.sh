@@ -152,11 +152,6 @@ if [ $RC -ne 0 ]; then
 	exit ${RC}
 fi
 
-sftp -oConnectTimeout=10 ${POSTUSER}@${SFTP_H} << !
-rm ${FILESRC}
-!
-
-
 #while [ $RC -ne 0 ]
 #do
 #   command1
@@ -218,5 +213,10 @@ if [ $HTTPS_POST_RC -ne 0 ]; then
 	echo "Error: the FileNet processing failed"
 	exit $HTTPS_POST_RC
 fi
+
+# Once everything is ok then delete the file from Host
+sftp -oConnectTimeout=10 ${POSTUSER}@${SFTP_H} << !
+rm ${FILESRC}
+!
 
 find ${FILEDST}${LOGFILE}*.log -mtime +10 -type f -delete
