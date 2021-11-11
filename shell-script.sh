@@ -40,11 +40,11 @@ elif [ $1 = HV ]; then
 	POSTURL="https://ddd-cpe-hv.intranet.unicredit.eu/DDMEGABatch/"
 	FILEDST="/opt/FileNet/shared/Host/"
 fi
-LOGFILE="sftp-download"
+LOGFILE="shell-script-execution"
 
 exec 3>&1 4>&2
 trap 'exec 2>&4 1>&3' 0 1 2 3
-exec 1>"${FILEDST}${LOGFILE}-$(date +%F-%T).log" 2>&1
+exec 1>"${FILEDST}${LOGFILE}-$(date +%Y-%m-%d-%H-%M-%S).log" 2>&1
 
 
 #Test for the existance of arguments
@@ -129,8 +129,6 @@ if [ $BACKUPSERV = false ]; then
 else
 	SFTP_H=${SFTP_HOST2}
 fi
-
-rm ${HOME}/${FILESRC}
 
 #lftp -c "open -e \"set ssl:verify-certificate no; \
 #	set net:max-retries 3; \
@@ -218,5 +216,23 @@ fi
 sftp -oConnectTimeout=10 ${POSTUSER}@${SFTP_H} << !
 rm ${FILESRC}
 !
+
+RC=$?
+
+if [ $RC -ne 0 ]; then
+        echo "RETC = $RC"
+        echo "Error: Removing file from sftp server failed"
+        exit 122
+fi
+
+rm ${HOME}/${FILESRC}
+
+RC=$?
+
+if [ $RC -ne 0 ]; then
+        echo "RETC = $RC"
+        echo "Error: Removing file user home directory failed"
+        exit 121
+fi
 
 find ${FILEDST}${LOGFILE}*.log -mtime +10 -type f -delete
