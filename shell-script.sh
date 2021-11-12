@@ -138,7 +138,7 @@ fi
 #
 #get ${FILESRC} -o ${HOME}/; exit"
 
-sftp -oConnectTimeout=10 ${POSTUSER}@${SFTP_H} << !
+sftp -b -oConnectTimeout=10 ${POSTUSER}@${SFTP_H} << !
 get ${FILESRC}
 !
 
@@ -146,7 +146,7 @@ get ${FILESRC}
 RC=$?
 if [ $RC -ne 0 ]; then
 	echo "RETC = ${RC}"
-	echo "Error: download failed"
+	echo "Error: sftp download failed"
 	exit ${RC}
 fi
 
@@ -158,6 +158,12 @@ fi
 #done
 
 cp ${HOME}/${FILESRC} ${FILEDST}/
+
+if [ $RC -ne 0 ]; then
+	echo "RETC = ${RC}"
+	echo "Error: copy to nas failed"
+	exit 120
+fi
 
 #delete this
 #Determine the type of the files from it's name
