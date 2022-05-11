@@ -138,7 +138,7 @@ fi
 #
 #get ${FILESRC} -o ${HOME}/; exit"
 
-sftp -b -oConnectTimeout=10 ${POSTUSER}@${SFTP_H} << !
+sftp -oConnectTimeout=10 ${POSTUSER}@${SFTP_H} << !
 get ${FILESRC}
 !
 
