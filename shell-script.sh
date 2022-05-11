@@ -201,6 +201,11 @@ if [ $RC -ne 0 ]; then
         exit $RC
 fi
 
+if [[ $UUID_CODE =~ ^\{?[A-F0-9a-f]{8}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{12}\}?$ ]]; then
+        echo "Error: the FileNet processing job failed to start"
+        exit 115
+fi
+
 echo "uuid=${UUID_CODE}"
 
 while [ ${HTTPS_POST_RC} = 4 ]
