@@ -203,8 +203,11 @@ fi
 
 if [[ $UUID_CODE =~ ^\{?[A-F0-9a-f]{8}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{12}\}?$ ]]; then
 	echo "UUID: = ${UUID_CODE}"
-        echo "Error: the FileNet processing job failed to start"
-        exit 115
+        echo "Valid UUID found"
+else
+	echo "UUID: = ${UUID_CODE}"
+	echo "Error: the FileNet processing job failed to start"
+	exit 115
 fi
 
 echo "uuid=${UUID_CODE}"
